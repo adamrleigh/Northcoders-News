@@ -10,4 +10,9 @@ apiRouter
         res.status(200).send({ message: 'all ok' })
     });
 
+apiRouter.use('/articles', articlesRouter);
+apiRouter.use('/comments', commentsRouter);
+apiRouter.use('/topics', topicsRouter);
+apiRouter.use('/users', usersRouter);
+
 module.exports = apiRouter;
