@@ -1,5 +1,5 @@
 const express = require("express");
-const apiRouter = require('./routers/api.router');
+const apiRouter = require('./routers/api.router')
 const { handleServerErrors,
     handlePsqlErrors,
     handleCustomErrors } = require("./errors/error.js");
