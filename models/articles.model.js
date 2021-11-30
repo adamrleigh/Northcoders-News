@@ -1,14 +1,14 @@
 const db = require('../db/connection');
 const { getFrom, patchTo, incVote, addTo } = require('./functions.model');
 
-const articleiser = (article_id) => {
+const articleiser = (article_id = null) => {
     const values = 'articles.*, COUNT(comments.comment_id) AS comment_count'
-    console.log(article_id, article_id === null);
     return getFrom('articles', values, article_id === null ? [] : [{ 'articles.article_id': article_id }], 'LEFT OUTER', 'comments', 'article_id', 'articles.article_id');
 }
 
-exports.selectArticles = () =>
-    articleiser(null);
+exports.selectArticles = (id, body, queries) => {
+    return articleiser();
+}
 
 exports.selectArticleById = (article_id) =>
     articleiser(article_id);

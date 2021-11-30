@@ -3,7 +3,7 @@
 const doThis = (req, res, next, fun, code, key = null) => {
     const id = Object.values(req.params)[0];
     const { inc_votes } = req.body;
-    fun(id, inc_votes ? inc_votes : req.body).then((result) => {
+    fun(id, inc_votes ? inc_votes : req.body, req.query).then((result) => {
         if (key === null) res.status(code).send();
         else {
             const response = {};
