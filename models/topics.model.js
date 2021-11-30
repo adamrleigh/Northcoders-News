@@ -1,9 +1,5 @@
 const db = require('../db/connection');
+const { getFrom } = require('./functions.model');
 
-exports.selectTopics = () => {
-    return db.query(`
-    SELECT * FROM TOPICS;
-    `).then(({ rows }) => {
-        return rows;
-    })
-}
+exports.selectTopics = () =>
+    getFrom('topics');

@@ -3,11 +3,18 @@ const articlesRouter = require('./articles.router');
 const commentsRouter = require('./comments.routers');
 const topicsRouter = require('./topics.router');
 const usersRouter = require('./users.router');
+const fs = require('fs/promises');
 
 apiRouter
     .route('/')
-    .get((req, res) => {
-        res.status(200).send({ message: 'all ok' })
+    .get(async (req, res, next) => {
+        try {
+            const file = await fs.readFile('/home/adam/northcoders/fundamentals/week7/be-nc-news/endpoints.json', 'utf8');
+            res.status(200).send(file);
+        }
+        catch (err) {
+            next(err)
+        }
     });
 
 apiRouter.use('/articles', articlesRouter);

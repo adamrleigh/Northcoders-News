@@ -1,16 +1,21 @@
-const { selectArticles, selectArticleById } = require('../models/articles.model');
+const { selectArticles, selectArticleById, selectArticleComments, updateArticle, addComment } = require('../models/articles.model');
+const { getThis, postThis } = require('./functions.controller')
 
-exports.getArticles = (req, res, next) => {
-    selectArticles().then((articles) => {
-        res.status(200).send({ articles: articles })
-    })
-        .catch(next)
-};
 
-exports.getArticleById = (req, res, next) => {
-    const { article_id } = req.params;
-    selectArticleById(article_id).then((article) => {
-        res.status(200).send({ article: article })
-    })
-        .catch(next)
-};
+exports.getArticles = (req, res, next) =>
+    getThis(req, res, next, selectArticles, 'articles');
+
+
+exports.getArticleById = (req, res, next) =>
+    getThis(req, res, next, selectArticleById, 'article');
+
+
+exports.getArticleComments = (req, res, next) =>
+    getThis(req, res, next, selectArticleComments, 'comments');
+
+
+exports.patchArticle = (req, res, next) =>
+    getThis(req, res, next, updateArticle, 'article');
+
+exports.postComment = (req, res, next) =>
+    postThis(req, res, next, addComment, 'comment');

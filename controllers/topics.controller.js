@@ -1,8 +1,6 @@
 const { selectTopics } = require('../models/topics.model');
+const { getThis } = require('./functions.controller');
 
-exports.getTopics = (req, res, next) => {
-    selectTopics().then((topics) => {
-        res.status(200).send({ topics: topics })
-    })
-        .catch(next)
-};
+exports.getTopics = (req, res, next) =>
+    getThis(req, res, next, selectTopics, 'topics');
+

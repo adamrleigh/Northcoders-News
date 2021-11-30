@@ -1,20 +1,23 @@
 const db = require('../db/connection');
+const { getFrom, patchTo, incVote, addTo } = require('./functions.model');
 
-exports.selectArticles = () => {
-    return db.query(`
-    SELECT * FROM articles;
-    `).then(({ rows }) => {
-        return rows;
-    })
+exports.selectArticles = () => getFrom('articles');
+
+exports.selectArticleById = (article_id) => {
+    const values = 'articles.*, COUNT(comments.comment_id) AS comment_count';
+    return getFrom('articles', values, [{ 'articles.article_id': article_id }], 'comments', 'article_id', 'articles.article_id');
+}
+
+exports.selectArticleComments = (article_id) => {
+    const values = 'comment_id, votes, created_at, author, body';
+    return getFrom('comments', values, [{ 'comments.article_id': article_id }]);
+}
+
+exports.updateArticle = (article_id, inc_votes) =>
+    incVote(article_id, inc_votes, 'articles', 'article_id');
+
+exports.addComment = (article_id, newComment) => {
+    const values = { article_id: article_id, ...newComment };
+    return addTo('comments', values);
 };
 
-exports.selectArticleById = article_id => {
-    if (/\D/.test(article_id) || article_id === NaN) throw { status: 400, message: 'Article id must be a number' }
-    return db.query(`
-    SELECT * FROM articles WHERE article_id = $1;`,
-        [article_id]
-    ).then(({ rows }) => {
-        if (!rows[0]) throw { status: 400, message: `Article with id ${article_id} not found` }
-        return rows[0];
-    })
-};

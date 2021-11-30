@@ -3,21 +3,28 @@ const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
 const app = require('../app');
+const fs = require('fs/promises')
 require('jest-sorted');
+
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
 describe('GET /api', () => {
-    test('Response 200 and returns message: all ok', () => {
+    test('Response 200 and returns endpoints.json', () => {
         return request(app)
             .get('/api')
             .expect(200)
-            .then(({ body }) => {
-                expect(body.message).toEqual('all ok');
+            .then(({ text }) => {
+                fs.readFile('/home/adam/northcoders/fundamentals/week7/be-nc-news/endpoints.json', 'utf-8')
+                    .then((file) => {
+                        expect(text).toEqual(file);
+                    })
             })
     })
 })
+
+
 
 describe('GET /api/topics', () => {
     test('Response 200 and returns object with key topics containing array of topics', () => {
@@ -68,17 +75,18 @@ describe('GET /api/articles', () => {
 describe('GET /api/articles/:article_id', () => {
     test('Response 200 and returns object with key article containing correct article if article exists', () => {
         return request(app)
-            .get('/api/articles/2')
+            .get('/api/articles/1')
             .expect(200)
             .then(({ body }) => {
                 expect(body.article).toEqual({
-                    "article_id": 2,
-                    "author": "icellusedkars",
-                    "body": "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
-                    "created_at": "2020-10-16T05:03:00.000Z",
-                    "title": "Sony Vaio; or, The Laptop",
-                    "topic": "mitch",
-                    "votes": 0
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    body: 'I find this existence challenging',
+                    votes: 100,
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    created_at: "2020-07-09T20:11:00.000Z",
+                    comment_count: "11"
                 })
             })
     })
@@ -87,7 +95,7 @@ describe('GET /api/articles/:article_id', () => {
             .get('/api/articles/10000000')
             .expect(400)
             .then(({ body }) => {
-                expect(body.message).toEqual('Article with id 10000000 not found')
+                expect(body.message).toEqual('No results found')
             })
     })
 
@@ -96,7 +104,135 @@ describe('GET /api/articles/:article_id', () => {
             .get('/api/articles/bad')
             .expect(400)
             .then(({ body }) => {
-                expect(body.message).toEqual('Article id must be a number')
+                expect(body.message).toEqual('Bad Request')
+            })
+    })
+})
+
+describe('GET /api/articles/:article_id/comments', () => {
+    test('Response 200 and returns array containing comment objects', () => {
+        return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.comments).toHaveLength(11)
+                body.comments.forEach(comment => {
+                    expect(comment).toEqual(expect.objectContaining({
+                        comment_id: expect.any(Number),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number)
+                    }))
+                })
+            })
+    })
+})
+
+
+describe('GET /api/users', () => {
+    test('Response 200 and returns array containing user objects', () => {
+        return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.users).toHaveLength(4);
+                expect(body.users).toEqual([
+                    { username: 'butter_bridge' },
+                    { username: 'icellusedkars' },
+                    { username: 'rogersop' },
+                    { username: 'lurker' }
+                ])
+            })
+    })
+})
+
+
+describe('PATCH /api/articles/:article_id', () => {
+    test('Response 200 and returns updated article', () => {
+        newObj = { inc_votes: 100 }
+        return request(app)
+            .patch('/api/articles/1')
+            .send(newObj)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    body: 'I find this existence challenging',
+                    votes: 200,
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    created_at: "2020-07-09T20:11:00.000Z",
+                })
+            })
+    })
+})
+
+describe('PATCH /api/comments/:article_id', () => {
+    test('Response 200 and returns object with key comment containing comment object', () => {
+        newObj = { inc_votes: 100 }
+        return request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.comment).toEqual({
+                    article_id: 9,
+                    "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                    "comment_id": 1,
+                    "created_at": "2020-04-06T12:17:00.000Z",
+                    "votes": 116,
+                    author: 'butter_bridge'
+                })
+            })
+    })
+})
+
+describe('DELETE /api/comments/:article_id', () => {
+    test('Response 204', () => {
+        return request(app)
+            .delete('/api/comments/1')
+            .expect(204)
+    })
+})
+
+
+describe('GET /api/users/:user_id', () => {
+    test('Response 200 and returns object with key user containing user', () => {
+        return request(app)
+            .get('/api/users/lurker')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.user).toEqual({
+                    "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+                    "name": "do_nothing",
+                    "username": "lurker",
+                })
+            })
+    })
+})
+
+
+describe('POST /api/articles/:article_id/comments', () => {
+    test('Response 201 and returns newly inserted comment in an object with key of comment', () => {
+        const newComment = {
+            author: `'lurker'`,
+            body: `'Yes, good'`
+        }
+        return request(app)
+            .post('/api/articles/2/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                expect(body.comment).toEqual({
+                    "article_id": 2,
+                    "author": "lurker",
+                    "body": "Yes, good",
+                    "comment_id": 19,
+                    "created_at": expect.any(String),
+                    "votes": 0,
+                })
             })
     })
 })
