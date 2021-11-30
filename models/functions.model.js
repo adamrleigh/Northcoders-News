@@ -27,27 +27,57 @@ const poster = objectArr =>
 VALUES (${Object.values(objectArr).join(', ')})
 `.replace(/\n/g, '');
 
+/*
+newQuery creates a query, which is then passed to queryDatabase (or db.query in the case of DELETE requests)
+which queries the database and handles the response:
+- Empty response throws error (hence delete requests are handled directly by db.query)
+- Singular items are returned as single array item 
+- Arrays are returned as arrays
+This is achieved by conditional logic, checking the size of the returned array
 
-//Values are either:
-// -GET: the columns to select in string format
-// -Other methods: the values to insert into the table in object format
+To generate the query, newQuery accepts many parameters and makes use of several helper functions
+to format data for insertion appropriately.
+Optional parameters are null by default and in this case an empty string is inserted where the parameter would be
 
-const newQuery = (method, table, values, conditions = [], joinWith = null, onKey = null, groupBy = null, orderBy = null) => {
+Three parameters must always be specified: 
+- Method
+- Table
+- Values
+
+Values are either:
+-GET: the columns to select in string format
+-Other methods: the values to insert into the table (in object format, i.e. {article_id: 10})
+*/
+
+
+
+
+
+const newQuery = (method, table, values, conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) => {
     // if (conditions.length != 0 && badNum(condition)) throw { status: 400, message: `id must be a number` }
     const methods = { 'get': `SELECT ${values} FROM`, 'patch': 'UPDATE', 'post': 'INSERT INTO', 'delete': 'DELETE FROM' }
     return `${methods[method]} ${table}
     ${method === 'patch' ? `SET ${patcher(values)}` : ''}
     ${method === 'post' ? poster(values) : ''}
-    ${joinWith ? `JOIN ${joinWith} ON ${table}.${onKey} = ${joinWith}.${onKey}` : ''}
+    ${joinWith ? `${joinType} JOIN ${joinWith} ON ${table}.${onKey} = ${joinWith}.${onKey}` : ''}
     ${conditions.length !== 0 ? `WHERE ${conditioner(conditions)}` : ''}
     ${groupBy ? `GROUP BY ${groupBy}` : ''}
     ${method === 'post' || method === 'patch' ? 'RETURNING *' : ''}
     `.replace(/\s+/g, ' ').trim() + ';'
 }
 
-const getFrom = (table, values = '*', conditions = [], joinWith = null, onKey = null, groupBy = null, orderBy = null) =>
+/*
+From newQuery, several higher order functions are generated:
+- getFrom 
+- patchTo 
+- addTo
+- deleteFrom 
+*/
+
+
+const getFrom = (table, values = '*', conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) =>
     queryDatabase(
-        newQuery('get', table, values, conditions, joinWith, onKey, groupBy, orderBy)
+        newQuery('get', table, values, conditions, joinType, joinWith, onKey, groupBy, sortBy, orderBy)
     );
 
 
@@ -62,8 +92,9 @@ const addTo = (table, values) =>
     );
 
 
-const queryDatabase = async (q) => {
-    const { rows } = await db.query(q);
+const queryDatabase = async (query) => {
+    console.log(query)
+    const { rows } = await db.query(query);
     if (rows.length === 0) throw { status: 400, message: `No results found` };
     return getResult(rows);
 }
@@ -85,6 +116,8 @@ const exists = (table, conditions) =>
     queryDatabase(
         newQuery('get', table, '*', conditions)
     );
+
+
 
 
 
