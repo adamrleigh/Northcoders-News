@@ -71,6 +71,69 @@ describe('GET /api/articles', () => {
                 })
             })
     })
+    test('Is sorted by sort_by query', () => {
+        return request(app)
+            .get('/api/articles?sort_by=title&&order_by=asc')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(12);
+                expect(body.articles).toBeSortedBy('title');
+                expect(body.articles).not.toBeSortedBy('author');
+                body.articles.forEach(article => {
+                    expect(article).toEqual(expect.objectContaining({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_count: expect.any(String)
+                    }))
+                })
+            })
+    })
+    test('Ordered by order_by query', () => {
+        return request(app)
+            .get('/api/articles?sort_by=author&&order_by=desc')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(12);
+                expect(body.articles).toBeSortedBy('author', { descending: true });
+                expect(body.articles).not.toBeSortedBy('title');
+                body.articles.forEach(article => {
+                    expect(article).toEqual(expect.objectContaining({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_count: expect.any(String)
+                    }))
+                })
+            })
+    })
+    test('Filtered by topic', () => {
+        return request(app)
+            .get('/api/articles?topic=cats')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toEqual(
+                    {
+                        title: 'UNCOVERED: catspiracy to bring down democracy',
+                        topic: 'cats',
+                        author: 'rogersop',
+                        body: 'Bastet walks amongst us, and the cats are taking arms!',
+                        created_at: expect.any(String),
+                        votes: 0,
+                        comment_count: "2",
+                        article_id: 5
+                    }
+                )
+            })
+    })
 })
 
 describe('GET /api/articles/:article_id', () => {

@@ -1,17 +1,24 @@
 const db = require('../db/connection');
-const { getFrom, patchTo, incVote, addTo } = require('./functions.model');
+const { getFrom, patchTo, incVote, addTo, deleteFrom } = require('./functions.model');
 
-const articleiser = (article_id = null) => {
+const articleiser = (conditons = [], sortBy = null, orderBy = null) => {
     const values = 'articles.*, COUNT(comments.comment_id) AS comment_count'
-    return getFrom('articles', values, article_id === null ? [] : [{ 'articles.article_id': article_id }], 'LEFT OUTER', 'comments', 'article_id', 'articles.article_id');
+    return getFrom('articles', values, conditons, 'LEFT OUTER', 'comments', 'article_id', 'articles.article_id', sortBy, orderBy);
 }
 
 exports.selectArticles = (id, body, queries) => {
-    return articleiser();
+    const conditions = queries.topic
+        ? [{ 'articles.topic': `'${queries.topic}'` }]
+        : [];
+    let { sort_by, order_by } = queries;
+    [sort_by, order_by] = [sort_by || null, order_by || null];
+    return articleiser(conditions, sort_by, order_by);
 }
 
-exports.selectArticleById = (article_id) =>
-    articleiser(article_id);
+exports.selectArticleById = (article_id) => {
+    const conditions = [{ 'articles.article_id': article_id }];
+    return articleiser(conditions);
+};
 
 exports.selectArticleComments = (article_id) => {
     const values = 'comment_id, votes, created_at, author, body';
@@ -26,3 +33,12 @@ exports.addComment = (article_id, newComment) => {
     return addTo('comments', values);
 };
 
+
+//Need to add comment_count to this
+exports.addArticle = (article_id, newArticle) => {
+    return addTo('articles', newArticle);
+};
+
+
+exports.removeArticle = (article_id) =>
+    deleteFrom('articles', [{ article_id: article_id }]);

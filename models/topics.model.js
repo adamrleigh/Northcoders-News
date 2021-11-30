@@ -1,5 +1,8 @@
 const db = require('../db/connection');
-const { getFrom } = require('./functions.model');
+const { getFrom, addTo } = require('./functions.model');
 
 exports.selectTopics = () =>
     getFrom('topics');
+
+exports.addTopic = (id, newTopic) =>
+    addTo('topics', newTopic);
