@@ -5,7 +5,7 @@ exports.updateComment = (req) =>
     incVote(
         'comments',
         req.params.comment_id,
-        req.body.inc_votes,
+        req.body,
         'comment_id'
     );
 

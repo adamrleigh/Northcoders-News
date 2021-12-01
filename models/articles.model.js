@@ -15,7 +15,7 @@ exports.selectArticles = (req) => {
         articleSelection + `${req.id ? '' : ',COUNT(DISTINCT articles.article_id) AS total_count'}`,
         conditions,
         ...articleArgs,
-        req.query.sort_by || null, req.query.order_by || null,
+        req.query.sort_by || 'created_at', req.query.order_by || 'desc',
         req.query.limit || null, req.query.p || 1,
     );
 }
@@ -32,7 +32,7 @@ exports.updateArticle = (req) =>
     incVote(
         'articles',
         req.params.article_id,
-        req.body.inc_votes,
+        req.body,
         'article_id'
     );
 
@@ -42,7 +42,6 @@ exports.addComment = (req) =>
         { article_id: req.params.article_id, ...req.body }
     );
 
-// add tests 
 exports.addArticle = async (req) => {
     const { article_id } = await addTo(
         'articles',
