@@ -129,10 +129,25 @@ describe('GET /api/articles', () => {
                         created_at: expect.any(String),
                         votes: 0,
                         comment_count: "2",
-                        article_id: 5
+                        article_id: 5,
+                        total_count: "1"
                     }
                 )
             })
+    })
+    test('Pagination works correctly', () => {
+        return request(app)
+            .get('/api/articles?limit=5')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(5);
+            })
+    })
+
+    test('Filtered by topic that does not exist', () => {
+        return request(app)
+            .get('/api/articles?topic=lemur')
+            .expect(400)
     })
 })
 
@@ -150,7 +165,8 @@ describe('GET /api/articles/:article_id', () => {
                     topic: 'mitch',
                     author: 'butter_bridge',
                     created_at: "2020-07-09T20:11:00.000Z",
-                    comment_count: "11"
+                    comment_count: "11",
+                    total_count: "1"
                 })
             })
     })
@@ -281,8 +297,8 @@ describe('GET /api/users/:user_id', () => {
 describe('POST /api/articles/:article_id/comments', () => {
     test('Response 201 and returns newly inserted comment in an object with key of comment', () => {
         const newComment = {
-            author: `'lurker'`,
-            body: `'Yes, good'`
+            author: `lurker`,
+            body: `Yes, good`
         }
         return request(app)
             .post('/api/articles/2/comments')
@@ -300,6 +316,46 @@ describe('POST /api/articles/:article_id/comments', () => {
             })
     })
 })
+
+
+
+describe('POST /api/articles', () => {
+    const newArticle = {
+        title: "testArticle",
+        topic: "mitch",
+        author: "butter_bridge",
+        body: "Lorem ipsum dolor sit amet",
+    }
+    test('Response 200', () => {
+        return request(app)
+            .post('/api/articles')
+            .send(newArticle)
+            .expect(201)
+            .then(({ body }) => {
+                expect(body.article).toEqual(
+                    {
+                        article_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        title: "testArticle",
+                        topic: "mitch",
+                        author: "butter_bridge",
+                        body: "Lorem ipsum dolor sit amet",
+                        comment_count: "0"
+                    })
+            });
+    })
+})
+
+// describe('POST /api/article', () => {
+//     test('Response 204', () => {
+//         return request(app)
+//             .post('/api/comments/')
+//             .expect(200)
+//             .then(res => console.log(res));
+//     })
+// })
+
 
 
 // describe('', () => {

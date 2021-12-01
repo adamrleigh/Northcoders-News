@@ -1,9 +1,13 @@
 //It's called getThis but it actually works for patch too
 
 const doThis = (req, res, next, fun, code, key = null) => {
-    const id = Object.values(req.params)[0];
-    const { inc_votes } = req.body;
-    fun(id, inc_votes ? inc_votes : req.body, req.query).then((result) => {
+    fun(
+        {
+            params: req.params,
+            body: req.body,
+            query: req.query
+        }
+    ).then((result) => {
         if (key === null) res.status(code).send();
         else {
             const response = {};
@@ -13,8 +17,6 @@ const doThis = (req, res, next, fun, code, key = null) => {
     })
         .catch(next)
 };
-
-
 
 const getThis = (req, res, next, fun, key) =>
     doThis(req, res, next, fun, 200, key);

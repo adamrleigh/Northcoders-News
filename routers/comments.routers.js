@@ -1,6 +1,5 @@
 const commentsRouter = require('express').Router();
-const { patchComment, deleteComment } = require('../controllers/comments.controller');
-
+const { patchComment, deleteComment, addComment } = require('../controllers/comments.controller');
 
 commentsRouter
     .route('/:comment_id')

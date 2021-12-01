@@ -4,5 +4,8 @@ const { getFrom, addTo } = require('./functions.model');
 exports.selectTopics = () =>
     getFrom('topics');
 
-exports.addTopic = (id, newTopic) =>
-    addTo('topics', newTopic);
+exports.addTopic = (req) =>
+    addTo(
+        'topics',
+        req.body.newTopic
+    );

@@ -1,44 +1,64 @@
 const db = require('../db/connection');
 const { getFrom, patchTo, incVote, addTo, deleteFrom } = require('./functions.model');
 
-const articleiser = (conditons = [], sortBy = null, orderBy = null) => {
-    const values = 'articles.*, COUNT(comments.comment_id) AS comment_count'
-    return getFrom('articles', values, conditons, 'LEFT OUTER', 'comments', 'article_id', 'articles.article_id', sortBy, orderBy);
+const articleSelection = 'articles.*, COUNT(comments.comment_id) AS comment_count';
+const articleArgs = ['LEFT OUTER', 'comments', 'article_id', 'articles.article_id'];
+
+exports.selectArticles = (req) => {
+    const conditions = req.params.article_id
+        ? [{ 'articles.article_id': req.params.article_id }]
+        : req.query.topic
+            ? [{ 'articles.topic': `'${req.query.topic}'` }]
+            : [];
+    return getFrom(
+        'articles',
+        articleSelection + `${req.id ? '' : ',COUNT(DISTINCT articles.article_id) AS total_count'}`,
+        conditions,
+        ...articleArgs,
+        req.query.sort_by || null, req.query.order_by || null,
+        req.query.limit || null, req.query.p || 1,
+    );
 }
 
-exports.selectArticles = (id, body, queries) => {
-    const conditions = queries.topic
-        ? [{ 'articles.topic': `'${queries.topic}'` }]
-        : [];
-    let { sort_by, order_by } = queries;
-    [sort_by, order_by] = [sort_by || null, order_by || null];
-    return articleiser(conditions, sort_by, order_by);
+exports.selectArticleComments = (req) =>
+    getFrom(
+        'comments',
+        'comment_id, votes, created_at, author, body',
+        [{ 'comments.article_id': req.params.article_id }]
+    );
+
+
+exports.updateArticle = (req) =>
+    incVote(
+        'articles',
+        req.params.article_id,
+        req.body.inc_votes,
+        'article_id'
+    );
+
+exports.addComment = (req) =>
+    addTo(
+        'comments',
+        { article_id: req.params.article_id, ...req.body }
+    );
+
+// add tests 
+exports.addArticle = async (req) => {
+    const { article_id } = await addTo(
+        'articles',
+        req.body,
+        'article_id',
+    );
+    return getFrom(
+        'articles',
+        articleSelection,
+        [{ 'articles.article_id': article_id }],
+        ...articleArgs
+    );
 }
 
-exports.selectArticleById = (article_id) => {
-    const conditions = [{ 'articles.article_id': article_id }];
-    return articleiser(conditions);
-};
-
-exports.selectArticleComments = (article_id) => {
-    const values = 'comment_id, votes, created_at, author, body';
-    return getFrom('comments', values, [{ 'comments.article_id': article_id }]);
-}
-
-exports.updateArticle = (article_id, inc_votes) =>
-    incVote(article_id, inc_votes, 'articles', 'article_id');
-
-exports.addComment = (article_id, newComment) => {
-    const values = { article_id: article_id, ...newComment };
-    return addTo('comments', values);
-};
-
-
-//Need to add comment_count to this
-exports.addArticle = (article_id, newArticle) => {
-    return addTo('articles', newArticle);
-};
-
-
-exports.removeArticle = (article_id) =>
-    deleteFrom('articles', [{ article_id: article_id }]);
+exports.removeArticle = (req) =>
+    deleteFrom(
+        'articles',
+        [{ article_id: req.params.article_id }]
+    );

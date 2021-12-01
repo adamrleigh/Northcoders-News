@@ -2,9 +2,14 @@ const db = require('../db/connection');
 const { getFrom } = require('./functions.model');
 
 exports.selectUsers = () =>
-    getFrom('users', 'username');
+    getFrom(
+        'users',
+        'username'
+    );
 
-exports.selectUserById = (username) => {
-    const values = 'username, avatar_url, name'
-    return getFrom('users', values, [{ username: `'${username}'` }]);
-}
+exports.selectUserById = (req) =>
+    getFrom(
+        'users',
+        'username, avatar_url, name',
+        [{ username: `'${req.params.user_id}'` }]
+    );

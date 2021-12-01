@@ -43,7 +43,7 @@ const patcher = objectArr =>
 //From {k1: v1, k2: v2...} to `(k1, k2...) VALUES (v1, v2...)` when posting
 const poster = objectArr =>
     `(${Object.keys(objectArr).join(', ')}) 
-VALUES (${Object.values(objectArr).join(', ')})
+VALUES (${Object.values(objectArr).map(val => typeof val === 'string' ? `'${val}'` : val).join(', ')})
 `.replace(/\n/g, '');
 
 /*
@@ -68,79 +68,45 @@ Values are either:
 -Other methods: the values to insert into the table (in object format, i.e. {article_id: 10})
 */
 
-// const newQuery = (method, table, values, conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) => {
-//     // if (conditions.length != 0 && badNum(condition)) throw { status: 400, message: `id must be a number` }
-//     const methods = { 'get': `SELECT ${values} FROM`, 'patch': 'UPDATE', 'post': 'INSERT INTO', 'delete': 'DELETE FROM' }
-//     return `${methods[method]} ${table}
-//     ${method === 'patch' ? `SET ${patcher(values)}` : ''}
-//     ${method === 'post' ? poster(values) : ''}
-//     ${joinWith ? `${joinType} JOIN ${joinWith} ON ${table}.${onKey} = ${joinWith}.${onKey}` : ''}
-//     ${conditions.length !== 0 ? `WHERE ${conditioner(conditions)}` : ''}
-//     ${groupBy ? `GROUP BY ${groupBy}` : ''}
-//     ${method === 'post' || method === 'patch' ? 'RETURNING *' : ''}
-//     `.replace(/\s+/g, ' ').trim() + ';'
-// }
 
 
-
-// const newQuery = (method, table, values, conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) => {
-//     // if (conditions.length != 0 && badNum(condition)) throw { status: 400, message: `id must be a number` }
-//     const methods = { 'get': `SELECT ${values} FROM`, 'patch': 'UPDATE', 'post': 'INSERT INTO', 'delete': 'DELETE FROM' }
-//     return `${methods[method]} ${table}
-//     ${method === 'patch' ? `SET ${patcher(values)}` : ''}
-//     ${method === 'post' ? poster(values) : ''}
-//     ${joinWith ? `${joinType} JOIN ${joinWith} ON ${table}.${onKey} = ${joinWith}.${onKey}` : ''}
-//     ${conditions.length !== 0 ? `WHERE ${conditioner(conditions)}` : ''}
-//     ${groupBy ? `GROUP BY ${groupBy}` : ''}
-//     ${method === 'post' || method === 'patch' ? 'RETURNING *' : ''}
-//     `.replace(/\s+/g, ' ').trim() + ';'
-// }
-
-const newQuery = (method, table, values, conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) => {
+const newQuery = (method, table, selection = '*', insert = null, conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null, limit = null, p = 1) => {
     // if (conditions.length != 0 && badNum(condition)) throw { status: 400, message: `id must be a number` }
-    const methods = { 'get': `SELECT ${values} FROM`, 'patch': 'UPDATE', 'post': 'INSERT INTO', 'delete': 'DELETE FROM' }
+    const methods = { 'get': `SELECT ${selection} FROM`, 'patch': 'UPDATE', 'post': 'INSERT INTO', 'delete': 'DELETE FROM' }
     return format(`${methods[method]} ${table}
     ${method === 'patch' ? `SET %s` : ''}
     ${method === 'post' ? '%s' : ''}
     ${joinWith ? `${joinType} JOIN ${joinWith} ON ${table}.${onKey} = ${joinWith}.${onKey}` : ''}
     ${conditions.length !== 0 ? `WHERE ${conditioner(conditions)}` : ''}
     ${groupBy ? `GROUP BY ${groupBy}` : ''}
-    ${method === 'post' || method === 'patch' ? 'RETURNING *' : ''}
+    ${method === 'post' || method === 'patch' ? `RETURNING ${selection}` : ''}
     ${sortBy ? `ORDER BY ${sortBy} ${orderBy}` : ''}
+    ${limit ? `LIMIT ${limit} OFFSET ${(p - 1) * limit}` : ''}
     `.replace(/\s+/g, ' ').trim() + ';',
         method === 'get'
-            ? values
+            ? selection
             : method === 'patch'
-                ? patcher(values)
+                ? patcher(insert)
                 : method === 'post'
-                    ? poster(values)
+                    ? poster(insert)
                     : '',
     )
 }
 
-/*
-From newQuery, several higher order functions are generated:
-- getFrom 
-- patchTo 
-- addTo
-- deleteFrom 
-*/
 
-
-const getFrom = (table, values = '*', conditions = [], joinType = null, joinWith = null, onKey = null, groupBy = null, sortBy = null, orderBy = null) =>
+const getFrom = (table, values = '*', ...rest) =>
     queryDatabase(
-        newQuery('get', table, values, conditions, joinType, joinWith, onKey, groupBy, sortBy, orderBy)
+        newQuery('get', table, values, null, ...rest)
     );
 
-
-const patchTo = (table, values, conditions = []) =>
+const patchTo = (table, values, ...rest) =>
     queryDatabase(
-        newQuery('patch', table, values, conditions)
+        newQuery('patch', table, '*', values, ...rest)
     );
 
-const addTo = (table, values) =>
+const addTo = (table, values, selection = '*', ...rest) =>
     queryDatabase(
-        newQuery('post', table, values)
+        newQuery('post', table, selection, values, [], ...rest)
     );
 
 
@@ -152,22 +118,18 @@ const queryDatabase = async (query) => {
 }
 
 
-const deleteFrom = (table, conditions = []) =>
+const deleteFrom = (table, ...rest) =>
     db.query(
-        newQuery('delete', table, null, conditions)
+        newQuery('delete', table, null, null, ...rest)
     );
 
-const incVote = (id, inc, table, condition) => {
+const incVote = (table, id, inc, condition) => {
     const values = [{ votes: `votes + ${inc}` }]
     const newObj = {}
     newObj[condition] = id;
     return patchTo(table, values, [newObj])
 }
 
-const exists = (table, conditions) =>
-    queryDatabase(
-        newQuery('get', table, '*', conditions)
-    );
 
 
 

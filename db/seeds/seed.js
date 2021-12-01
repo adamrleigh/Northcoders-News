@@ -26,15 +26,15 @@ const seed = (data) => {
              title TEXT,
              body TEXT,
              votes INT DEFAULT 0,
-             topic TEXT NOT NULL REFERENCES topics(slug),
-             author VARCHAR(50) NOT NULL REFERENCES users(username),
+             topic TEXT NOT NULL REFERENCES topics(slug) ON DELETE CASCADE,
+             author VARCHAR(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
            )
            `).then(() => {
           return db.query(`
              CREATE TABLE comments (
                comment_id SERIAL PRIMARY KEY,
-               author VARCHAR(50) NOT NULL REFERENCES users(username),
+               author VARCHAR(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
                article_id INT NOT NULL REFERENCES articles(article_id),
                votes INT DEFAULT 0,
                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
