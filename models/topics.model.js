@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { queryDatabase } = require('./functions.model');
+const { queryDatabase, queryDatabaseById } = require('./functions.model');
 const { validatePost } = require('../controllers/errors.controller')
 
 exports.selectTopics = () =>
@@ -9,8 +9,8 @@ exports.selectTopics = () =>
 
 exports.addTopic = (req) => {
     validatePost(req, 'topics');
-    return queryDatabase(`
-    INSERT INTO articles 
+    return queryDatabaseById(`
+    INSERT INTO topics 
     (description, slug)
     VALUES
     ($1, $2)

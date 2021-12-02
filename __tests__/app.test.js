@@ -50,6 +50,58 @@ describe('GET /api/topics', () => {
     })
 })
 
+describe('POST /api/topics', () => {
+    test('Response 201 and returns inserted topic if topic valid', () => {
+        const newTopic = {
+            description: 'This is a new topic',
+            slug: 'This is a new slug'
+        }
+        return request(app)
+            .post('/api/topics')
+            .send(newTopic)
+            .expect(201)
+            .then(({ body }) => {
+                expect(body.topic).toEqual(
+                    {
+                        description: 'This is a new topic',
+                        slug: 'This is a new slug'
+                    }
+                )
+            })
+    })
+
+    test('Response 400 if insufficient arguments', () => {
+        const newTopic = {
+            description: 'This is a new topic',
+        }
+        return request(app)
+            .post('/api/topics')
+            .send(newTopic)
+            .expect(400)
+    })
+    test('Response 400 if too many arguments', () => {
+        const newTopic = {
+            description: 'This is a new topic',
+            topic: 'This is a new topic',
+            id: 1
+        }
+        return request(app)
+            .post('/api/topics')
+            .send(newTopic)
+            .expect(400)
+    })
+    test('Response 400 if invalid arguments', () => {
+        const newTopic = {
+            description: 'This is a new topic',
+            not_topic: 'This should be an error'
+        }
+        return request(app)
+            .post('/api/topics')
+            .send(newTopic)
+            .expect(400)
+    })
+})
+
 describe('GET /api/articles', () => {
     test('Response 200 and returns object with key articles containing array of articles sorted by date_created desc', () => {
         return request(app)
@@ -396,14 +448,7 @@ describe('POST /api/articles', () => {
     })
 })
 
-// describe('POST /api/article', () => {
-//     test('Response 204', () => {
-//         return request(app)
-//             .post('/api/comments/')
-//             .expect(200)
-//             .then(res => console.log(res));
-//     })
-// })
+
 
 
 

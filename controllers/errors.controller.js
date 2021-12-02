@@ -46,22 +46,16 @@ const inValidPatch = (body) => {
 exports.validatePost = (req, table) => {
     const props = Object.keys(req.body);
     props.forEach(prop => {
-        if (!properties[table].includes(prop)) {
-            console.log(1);
+        if (!properties[table].includes(prop))
             throw { status: 400, message: `Invalid property ${prop} for table ${table}` };
-        }
         if (table === 'articles' && prop === 'article_id'
             || table === 'comments' && prop === 'comment_id'
-            || table === 'topics' && prop === 'topic_id') {
-            console.log(2);
+            || table === 'topics' && prop === 'topic_id')
             throw { status: 400, message: `${prop} should not be included in the URL not body` }
-        }
         if (table === 'articles' && props.length !== 4
             || table === 'comments' && props.length !== 2
-            || table === 'topics' && props.length !== 2) {
-            console.log(3)
+            || table === 'topics' && props.length !== 2)
             throw { status: 400, message: 'Not enough arguments supplied' }
-        }
     })
 }
 
