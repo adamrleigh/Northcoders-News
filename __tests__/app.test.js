@@ -75,6 +75,9 @@ describe('POST /api/topics', () => {
             .post('/api/topics')
             .send(newTopic)
             .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('topics expects 2 arguments\nReceived 1 argument')
+            })
     })
     test('Response 400 if too many arguments', () => {
         const newTopic = {
@@ -86,6 +89,9 @@ describe('POST /api/topics', () => {
             .post('/api/topics')
             .send(newTopic)
             .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('topics expects 2 arguments\nReceived 3 arguments')
+            })
     })
     test('Response 400 if invalid arguments', () => {
         const newTopic = {
@@ -96,6 +102,9 @@ describe('POST /api/topics', () => {
             .post('/api/topics')
             .send(newTopic)
             .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toEqual('Invalid property not_topic for table topics')
+            })
     })
 })
 
@@ -243,7 +252,7 @@ describe('GET /api/articles/:article_id', () => {
             .get('/api/articles/bad')
             .expect(400)
             .then(({ body }) => {
-                expect(body.message).toEqual('Bad Request')
+                expect(body.message).toEqual('article_id must be a number')
             })
     })
 })
