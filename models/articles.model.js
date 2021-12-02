@@ -95,7 +95,8 @@ exports.addArticle = async (req) => {
 
 
 exports.removeArticle = (req) => {
-    const q = `
-DELETE FROM articles WHERE article_id = $1`
-    return db.query(q, [req.params.article_id]);
+    return db.query(`
+DELETE FROM articles WHERE article_id = $1;`,
+        [req.params.article_id]
+    );
 }

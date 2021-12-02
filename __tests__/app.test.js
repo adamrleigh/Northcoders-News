@@ -455,7 +455,7 @@ describe('POST /api/articles', () => {
 describe('DELETE api/articles/:article_id', () => {
     test('status 204', () => {
         return request(app)
-            .delete('/api/articles/1')
+            .delete('/api/articles/2')
             .expect(204)
     })
 })
