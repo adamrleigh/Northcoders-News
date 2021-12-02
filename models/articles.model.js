@@ -41,9 +41,12 @@ exports.selectArticleById = (req) =>
 
 
 exports.selectArticleComments = (req) => {
+    const p = req.query.p || 1;
     return queryDatabase(`
     SELECT comment_id, votes, created_at, author, body FROM comments 
-    WHERE comments.article_id = $1`,
+    WHERE comments.article_id = $1
+    ${req.query.limit ? `LIMIT ${req.query.limit} OFFSET ${(p - 1) * req.query.limit}` : ''}
+    `,
         [req.params.article_id]
     );
 }
