@@ -10,7 +10,7 @@ apiRouter
     .get(async (req, res, next) => {
         try {
             const file = await fs.readFile('/home/adam/northcoders/fundamentals/week7/be-nc-news/endpoints.json', 'utf8');
-            res.status(200).send(JSON.parse(file));
+            res.status(200).send(file);
         }
         catch (err) {
             next(err)
