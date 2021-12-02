@@ -1,13 +1,8 @@
-//It's called getThis but it actually works for patch too
+const { findErrors } = require("./errors.controller");
 
 const doThis = (req, res, next, fun, code, key = null) => {
-    fun(
-        {
-            params: req.params,
-            body: req.body,
-            query: req.query
-        }
-    ).then((result) => {
+    findErrors(req);
+    fun(req).then((result) => {
         if (key === null) res.status(code).send();
         else {
             const response = {};
@@ -31,3 +26,4 @@ const deleteThis = (req, res, next, fun) =>
 
 
 module.exports = { getThis, postThis, deleteThis };
+

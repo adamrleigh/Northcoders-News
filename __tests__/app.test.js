@@ -51,12 +51,13 @@ describe('GET /api/topics', () => {
 })
 
 describe('GET /api/articles', () => {
-    test('Response 200 and returns object with key articles containing array of articles', () => {
+    test('Response 200 and returns object with key articles containing array of articles sorted by date_created desc', () => {
         return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({ body }) => {
                 expect(body.articles).toHaveLength(12);
+                expect(body.articles).toBeSortedBy('created_at', { descending: true });
                 body.articles.forEach(article => {
                     expect(article).toEqual(expect.objectContaining({
                         article_id: expect.any(Number),
@@ -121,7 +122,7 @@ describe('GET /api/articles', () => {
             .expect(200)
             .then(({ body }) => {
                 expect(body.articles).toEqual(
-                    {
+                    [{
                         title: 'UNCOVERED: catspiracy to bring down democracy',
                         topic: 'cats',
                         author: 'rogersop',
@@ -131,20 +132,30 @@ describe('GET /api/articles', () => {
                         comment_count: "2",
                         article_id: 5,
                         total_count: "1"
-                    }
+                    }]
                 )
             })
     })
-    test('Pagination works correctly', () => {
+    test('Results can be limited by limit query', () => {
         return request(app)
-            .get('/api/articles?limit=5')
+            .get('/api/articles?limit=2')
             .expect(200)
             .then(({ body }) => {
-                expect(body.articles).toHaveLength(5);
+                expect(body.articles).toHaveLength(2);
             })
     })
 
-    test('Filtered by topic that does not exist', () => {
+    test('Pagination return correct page', () => {
+        return request(app)
+            .get('/api/articles?sort_by=article_id&&order_by=asc&&limit=5&&p=2')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(5);
+                expect(body.articles.map(article => article.article_id)).toEqual([6, 7, 8, 9, 10])
+            })
+    })
+
+    test('Filtering by topic that does not exist returns error', () => {
         return request(app)
             .get('/api/articles?topic=lemur')
             .expect(400)
@@ -166,7 +177,6 @@ describe('GET /api/articles/:article_id', () => {
                     author: 'butter_bridge',
                     created_at: "2020-07-09T20:11:00.000Z",
                     comment_count: "11",
-                    total_count: "1"
                 })
             })
     })
@@ -320,13 +330,13 @@ describe('POST /api/articles/:article_id/comments', () => {
 
 
 describe('POST /api/articles', () => {
-    const newArticle = {
-        title: "testArticle",
-        topic: "mitch",
-        author: "butter_bridge",
-        body: "Lorem ipsum dolor sit amet",
-    }
-    test('Response 200', () => {
+    test('Response 201 and posted article returned if valid article', () => {
+        const newArticle = {
+            title: "testArticle",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "Lorem ipsum dolor sit amet",
+        }
         return request(app)
             .post('/api/articles')
             .send(newArticle)
@@ -344,6 +354,45 @@ describe('POST /api/articles', () => {
                         comment_count: "0"
                     })
             });
+    })
+    test('Error if too many arguments suppplied', () => {
+        const newArticle = {
+            title: "testArticle",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "Lorem ipsum dolor sit amet",
+            article_id: 1
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(newArticle)
+            .expect(400)
+            .then(({ body }) => {
+                console.log(body);
+            })
+    })
+    test('Error if insufficient arguments suppplied', () => {
+        const newArticle = {
+            title: "testArticle",
+            topic: "mitch",
+            author: "butter_bridge",
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(newArticle)
+            .expect(400)
+    })
+    test('Error if invalid arguments suppplied', () => {
+        const newArticle = {
+            title: "testArticle",
+            topic: "mitch",
+            author: "butter_bridge",
+            corpus: "Lorem ipsum dolor sit amet",
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(newArticle)
+            .expect(400)
     })
 })
 

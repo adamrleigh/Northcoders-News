@@ -1,11 +1,20 @@
 const db = require('../db/connection');
-const { getFrom, addTo } = require('./functions.model');
+const { queryDatabase } = require('./functions.model');
+const { validatePost } = require('../controllers/errors.controller')
 
 exports.selectTopics = () =>
-    getFrom('topics');
+    queryDatabase(`
+    SELECT * FROM topics
+    `);
 
-exports.addTopic = (req) =>
-    addTo(
-        'topics',
-        req.body.newTopic
+exports.addTopic = (req) => {
+    validatePost(req, 'topics');
+    return queryDatabase(`
+    INSERT INTO articles 
+    (description, slug)
+    VALUES
+    ($1, $2)
+    RETURNING *;`,
+        [...Object.values(req.body)]
     );
+}

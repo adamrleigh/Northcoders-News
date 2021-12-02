@@ -1,15 +1,16 @@
 const db = require('../db/connection');
-const { getFrom } = require('./functions.model');
+const { queryDatabase, queryDatabaseById } = require('./functions.model');
 
 exports.selectUsers = () =>
-    getFrom(
-        'users',
-        'username'
-    );
+    queryDatabase(`
+    SELECT username FROM users
+    `);
 
 exports.selectUserById = (req) =>
-    getFrom(
-        'users',
-        'username, avatar_url, name',
-        [{ username: `'${req.params.user_id}'` }]
+    queryDatabaseById(`
+    SELECT * FROM users
+    WHERE username = $1
+    `,
+        [req.params.user_id]
     );
+
