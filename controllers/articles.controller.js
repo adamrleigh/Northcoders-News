@@ -1,4 +1,4 @@
-const { selectArticles, selectArticleComments, updateArticle, addComment, addArticle, removeArticle } = require('../models/articles.model');
+const { selectArticles, selectArticleById, selectArticleComments, updateArticle, addComment, addArticle, removeArticle } = require('../models/articles.model');
 const { getThis, postThis, deleteThis } = require('./functions.controller')
 
 
@@ -7,7 +7,7 @@ exports.getArticles = (req, res, next) =>
     getThis(req, res, next, selectArticles, 'articles');
 
 exports.getArticleById = (req, res, next) =>
-    getThis(req, res, next, selectArticles, 'article');
+    getThis(req, res, next, selectArticleById, 'article');
 
 exports.getArticleComments = (req, res, next) =>
     getThis(req, res, next, selectArticleComments, 'comments');
