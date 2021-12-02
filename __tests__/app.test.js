@@ -420,7 +420,6 @@ describe('POST /api/articles', () => {
             .send(newArticle)
             .expect(400)
             .then(({ body }) => {
-                console.log(body);
             })
     })
     test('Error if insufficient arguments suppplied', () => {
