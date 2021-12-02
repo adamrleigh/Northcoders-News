@@ -3,7 +3,7 @@ const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
 const app = require('../app');
-const fs = require('fs/promises')
+const endpoints = require('../endpoints.json');
 require('jest-sorted');
 
 
@@ -16,10 +16,7 @@ describe('GET /api', () => {
             .get('/api')
             .expect(200)
             .then(({ text }) => {
-                fs.readFile('/home/adam/northcoders/fundamentals/week7/be-nc-news/endpoints.json', 'utf-8')
-                    .then((file) => {
-                        expect(text).toEqual(file);
-                    })
+                expect(JSON.parse(text)).toEqual(endpoints)
             })
     })
 })
