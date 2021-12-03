@@ -20,7 +20,8 @@ exports.selectArticles = (req) => {
     GROUP BY articles.article_id
     ORDER BY %I ${orderBy}
     ${req.query.limit ? `LIMIT ${req.query.limit} OFFSET ${(p - 1) * req.query.limit}` : ''}
-    ;`, sortBy);
+    ;`,
+        sortBy);
 
     return req.query.topic
         ? queryDatabase(query, [req.query.topic])
@@ -96,7 +97,7 @@ exports.addArticle = async (req) => {
 
 exports.removeArticle = (req) => {
     return db.query(`
-DELETE FROM articles WHERE article_id = $1;`,
+    DELETE FROM articles WHERE article_id = $1;`,
         [req.params.article_id]
     );
 }
