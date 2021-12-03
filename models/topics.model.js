@@ -1,15 +1,13 @@
 const db = require('../db/connection');
 const { queryDatabase, queryDatabaseById } = require('./functions.model');
-const { validatePost } = require('../controllers/errors.controller')
 
 exports.selectTopics = () =>
     queryDatabase(`
     SELECT * FROM topics
     `);
 
-exports.addTopic = (req) => {
-    validatePost(req, 'topics');
-    return queryDatabaseById(`
+exports.addTopic = (req) =>
+    queryDatabaseById(`
     INSERT INTO topics 
     (description, slug)
     VALUES
@@ -17,4 +15,4 @@ exports.addTopic = (req) => {
     RETURNING *;`,
         [...Object.values(req.body)]
     );
-}
+

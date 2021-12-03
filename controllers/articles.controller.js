@@ -1,5 +1,5 @@
 const { selectArticles, selectArticleById, selectArticleComments, updateArticle, addComment, addArticle, removeArticle } = require('../models/articles.model');
-const { getThis, postThis, deleteThis } = require('./functions.controller')
+const { getThis, postThis, deleteThis, patchThis } = require('./functions.controller')
 
 
 
@@ -13,7 +13,7 @@ exports.getArticleComments = (req, res, next) =>
     getThis(req, res, next, selectArticleComments, 'comments');
 
 exports.patchArticle = (req, res, next) =>
-    getThis(req, res, next, updateArticle, 'article');
+    patchThis(req, res, next, updateArticle, 'article');
 
 exports.postComment = (req, res, next) =>
     postThis(req, res, next, addComment, 'comment');

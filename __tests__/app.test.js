@@ -21,8 +21,6 @@ describe('GET /api', () => {
     })
 })
 
-
-
 describe('GET /api/topics', () => {
     test('Response 200 and returns object with key topics containing array of topics', () => {
         return request(app)
