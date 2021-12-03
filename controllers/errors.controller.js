@@ -49,7 +49,6 @@ exports.findErrors = (req) => {
             throw { status: 400, message: `user_id must be a string` }
     }
     if (![undefined, 'asc', 'desc'].includes(req.query.order_by)) throw { status: 400, message: `order_by must be either asc or desc not ${order_by}` }
-    if (req.query.limit && /\D/.test(req.query.limit)) throw { status: 400, message: `Limit must be a number not ${limit}` }
-    if (req.query.page && /\D/.test(page)) throw { status: 400, message: `Page must be a number not ${p}` }
-    return false;
+    if (req.query.limit && /\D/.test(req.query.limit)) throw { status: 400, message: `Limit must be a number, received ${typeof limit}` }
+    if (req.query.p && /\D/.test(req.query.p)) throw { status: 400, message: `Page must be a number, receieved ${typeof p}` }
 }
