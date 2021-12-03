@@ -11,6 +11,6 @@ exports.selectUserById = (req) =>
     SELECT * FROM users
     WHERE username = $1
     `,
-        [req.params.user_id]
+        [req.params.username]
     );
 

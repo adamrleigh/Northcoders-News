@@ -45,8 +45,6 @@ exports.validateReq = (req) => {
             || param === 'comment_id'
             || param === 'topic_id') && /\D/.test(req.params[param]))
             throw { status: 400, message: `${param} must be a number` }
-        else if (typeof req.params[param] !== 'string')
-            throw { status: 400, message: `user_id must be a string` }
     }
     if (![undefined, 'asc', 'desc'].includes(req.query.order_by)) throw { status: 400, message: `order_by must be either asc or desc` }
     if (req.query.limit && /\D/.test(req.query.limit)) throw { status: 400, message: `Limit must be a number` }

@@ -344,7 +344,7 @@ describe('DELETE /api/comments/:article_id', () => {
 })
 
 
-describe('GET /api/users/:user_id', () => {
+describe('GET /api/users/:username', () => {
     test('Response 200 and returns object with key user containing user', () => {
         return request(app)
             .get('/api/users/lurker')

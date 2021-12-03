@@ -7,7 +7,7 @@ usersRouter
     .get(getUsers);
 
 usersRouter
-    .route('/:user_id')
+    .route('/:username')
     .get(getUserById);
 
 module.exports = usersRouter;
