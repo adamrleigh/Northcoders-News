@@ -25,19 +25,6 @@ exports.selectArticles = async (req) => {
     return articles;
 }
 
-// exports.selectArticleById = async (req) => {
-//     const { rows: articles } = await db.query(`
-//     SELECT ${articleSelection} FROM articles
-//     LEFT OUTER JOIN comments ON articles.article_id = comments.article_id
-//     WHERE articles.article_id = $1
-//     GROUP BY articles.article_id
-//     ;`,
-//         [req.params.article_id]
-//     );
-//     if (!articles[0]) throw { status: 404, message: `article with article_id '${req.params.article_id}' not found` }
-//     return articles[0];
-// }
-
 exports.selectArticleById = async (req) => {
     const { rows: articles } = await db.query(`
     SELECT ${articleSelection} FROM articles
@@ -50,6 +37,7 @@ exports.selectArticleById = async (req) => {
     if (!articles[0]) throw { status: 404, message: `article with article_id '${req.params.article_id}' not found` }
     return articles[0];
 }
+
 
 exports.selectArticleComments = async (req) => {
     await this.selectArticleById(req);

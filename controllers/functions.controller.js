@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { validateQueries, validateId } = require('./errors.controller');
+const { validateQueries } = require('./errors.controller');
 
 const doThis = async (req, res, next, fun, code, key = null) => {
     if (await validateQueries(req)) res.status(400).send(await validateQueries(req))

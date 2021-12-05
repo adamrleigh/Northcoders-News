@@ -1,1 +1,2 @@
 add comments endpoints to endpoints.json
+add get comments by users to endpoints.json
