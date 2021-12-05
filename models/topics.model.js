@@ -1,6 +1,7 @@
 const db = require('../db/connection');
 const format = require('pg-format')
 
+
 exports.selectTopics = async () => {
     const { rows } = await db.query(`
     SELECT * FROM topics
@@ -20,4 +21,15 @@ exports.addTopic = async (req) => {
         [...Object.values(req.body)]
     );
     return rows[0];
+}
+
+exports.selectTopicById = async (req) => {
+    const { rows: topics } = await db.query(`
+    SELECT * FROM topics
+    WHERE slug = $1
+    ;`,
+        [req.query.topic]
+    );
+    if (!topics[0]) throw { status: 404, message: 'error' }
+    return topics[0];
 }

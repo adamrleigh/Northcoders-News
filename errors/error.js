@@ -10,6 +10,5 @@ exports.handlePsqlErrors = (err, req, res, next) => {
 }
 
 exports.handleServerErrors = (err, req, res, next) => {
-    console.log(JSON.stringify(err));
     res.status(500).send({ message: `Internal Server Error` });
 }

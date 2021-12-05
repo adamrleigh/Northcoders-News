@@ -1,4 +1,3 @@
-const { validatePost, checkExists } = require("./errors.controller")
 const db = require('../db/connection')
 
 const doThis = async (req, res, next, fun, code, key = null) => {

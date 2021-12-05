@@ -8,7 +8,7 @@ const seed = async (data) => {
   await db.query(`
       CREATE TABLE topics (
         slug TEXT PRIMARY KEY,
-        description TEXT
+        description TEXT NOT NULL
       );
       `)
   await db.query(`

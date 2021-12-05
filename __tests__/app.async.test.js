@@ -217,19 +217,15 @@ describe('GET /api/articles', () => {
             .expect(200)
 
         expect(articles).toHaveLength(2);
-
     })
 
     test('Pagination returns correct page', async () => {
         const { body: { articles } } = await request(app)
             .get('/api/articles?sort_by=article_id&&order=asc&&limit=5&&p=2')
-            .expect(200)
+            .expect(200);
 
-        expect(articles).toHaveLength(5);
         expect(articles.map(article => article.article_id)).toEqual([6, 7, 8, 9, 10])
-
     })
-
 })
 
 describe('GET /api/articles/:article_id', () => {
@@ -281,6 +277,15 @@ describe('GET /api/articles/:article_id/comments', () => {
             }))
         })
     })
+
+    test('Pagination works for comments', async () => {
+        const { body: { comments } } = await request(app)
+            .get('/api/articles/1/comments?sort_by=comment_id&&limit=3&&p=2')
+            .expect(200);
+
+        expect(comments.map(comment => comment.comment_id)).toEqual([5, 6, 7])
+    })
+
     test('If article_id exists but article has no comments: Response 200 and returns empty array', async () => {
         const { body: { comments } } = await request(app)
             .get('/api/articles/2/comments')
@@ -512,7 +517,7 @@ describe('GET /api/users/:username', () => {
     test('If username does not exist: Status 404', async () => {
         const { body: { user } } = await request(app)
             .get('/api/users/beserker')
-            .expect(404)
+            .expect(404);
     })
 })
 

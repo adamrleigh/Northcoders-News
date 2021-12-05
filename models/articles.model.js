@@ -1,17 +1,12 @@
 const db = require('../db/connection');
 const format = require('pg-format');
-const { checkTopicExists } = require('../models/functions.model');
-
+const { selectTopicById } = require('./topics.model');
 
 const articleSelection = 'articles.*, COUNT(comments.comment_id) AS comment_count';
 
-
 exports.selectArticles = async (req) => {
 
-    if (req.query.topic) {
-        const { rows: slug } = await db.query(`SELECT slug FROM topics WHERE slug = $1`, [req.query.topic]);
-        if (!slug[0]) throw { status: 404, message: 'error' }
-    }
+    if (req.query.topic) await selectTopicById(req);
 
     const selection = articleSelection + ',COUNT(DISTINCT articles.article_id) AS total_count'
     const query = format(`SELECT ${selection} FROM articles
@@ -23,10 +18,11 @@ exports.selectArticles = async (req) => {
     ;`,
         req.query.sort_by || 'created_at');
 
-    let body;
-    if (req.query.topic) body = await db.query(query, [req.query.topic])
-    else body = await db.query(query);
-    return body.rows;
+    const { rows: articles } = req.query.topic
+        ? await db.query(query, [req.query.topic])
+        : await db.query(query);
+
+    return articles;
 }
 
 exports.selectArticleById = async (req) => {
@@ -43,8 +39,7 @@ exports.selectArticleById = async (req) => {
 }
 
 exports.selectArticleComments = async (req) => {
-    const { rows: articles } = await db.query(`SELECT article_id FROM articles WHERE article_id = $1`, [req.params.article_id]);
-    if (!articles[0]) throw { status: 404, message: 'error' }
+    await this.selectArticleById(req);
     const { rows: comments } = await db.query(`
     SELECT comment_id, votes, created_at, author, body FROM comments 
     WHERE comments.article_id = $1
@@ -58,8 +53,7 @@ exports.selectArticleComments = async (req) => {
 
 
 exports.updateArticle = async (req) => {
-    const { rows: article } = await db.query(`SELECT article_id FROM articles WHERE article_id = $1`, [req.params.article_id]);
-    if (!article[0]) throw { status: 404, message: 'error' }
+    await this.selectArticleById(req);
     const { rows: articles } = await db.query(`
     UPDATE articles
     SET votes = votes ${req.body.inc_votes > 0 ? '+' : '- '} $1
@@ -75,8 +69,7 @@ exports.updateArticle = async (req) => {
 
 
 exports.addComment = async (req) => {
-    const { rows: articles } = await db.query(`SELECT article_id FROM articles WHERE article_id = $1`, [req.params.article_id]);
-    if (!articles[0]) throw { status: 404, message: 'error' }
+    await this.selectArticleById(req);
     const { rows: comments } = await db.query(
         format(`
     INSERT INTO comments 
@@ -101,7 +94,6 @@ exports.addArticle = async (req) => {
             ...Object.keys(req.body)),
         [...Object.values(req.body)]
     );
-    console.log(articles, 'HERE')
     return this.selectArticleById({ params: articles[0] });
 }
 
