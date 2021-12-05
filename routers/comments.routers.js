@@ -3,8 +3,7 @@ const { getComments, getCommentById, patchComment, deleteComment, postComment } 
 
 commentsRouter
     .route('/')
-    .get(getComments)
-// .post(postComment);
+    .get(getComments);
 
 
 commentsRouter

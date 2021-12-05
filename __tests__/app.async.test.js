@@ -226,6 +226,11 @@ describe('GET /api/articles', () => {
 
         expect(articles.map(article => article.article_id)).toEqual([6, 7, 8, 9, 10])
     })
+    test('Pagination returns correct page', async () => {
+        const { body: { articles } } = await request(app)
+            .get('/api/articles?sort_by=article_id&&order=asc&&limit=5&&p=a')
+            .expect(400);
+    })
 })
 
 describe('GET /api/articles/:article_id', () => {
@@ -390,6 +395,30 @@ describe('PATCH /api/articles/:article_id', () => {
             created_at: "2020-07-09T20:11:00.000Z",
         })
     })
+    test('If article_id exists and body without inc_votes supplied: Status 200 and return unchanged article', async () => {
+        const newObj = { not_inc_votes: 100 };
+        const { body: { article } } = await request(app)
+            .patch('/api/articles/1')
+            .send(newObj)
+            .expect(200);
+
+        expect(article).toEqual({
+            article_id: 1,
+            title: 'Living in the shadow of a great man',
+            body: 'I find this existence challenging',
+            votes: 100,
+            topic: 'mitch',
+            author: 'butter_bridge',
+            created_at: "2020-07-09T20:11:00.000Z",
+        })
+    })
+    test('If article_id exists and inc_votes is supplied but is not a number: Status 400', async () => {
+        const newObj = { inc_votes: 'adam' };
+        const { body: { article } } = await request(app)
+            .patch('/api/articles/1')
+            .send(newObj)
+            .expect(400);
+    })
     test('If valid id supplied but not found: Status 404', async () => {
         newObj = { inc_votes: -100 }
         const { body: { article } } = await request(app)
@@ -418,7 +447,7 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
-    test('If article_id exists and inc_votes is positive: Status 200 and returns updated article', async () => {
+    test('If article_id exists and inc_votes is negative: Status 200 and returns updated article', async () => {
         newObj = { inc_votes: -16 }
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -466,6 +495,30 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
+    test('If article_id exists and body without inc_votes supplied: Status 200 and return unchanged article', async () => {
+        const newObj = { not_inc_votes: 100 };
+        const { body: { comment } } = await request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(200);
+
+        expect(comment).toEqual({
+            article_id: 9,
+            "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            "comment_id": 1,
+            "created_at": "2020-04-06T12:17:00.000Z",
+            "votes": 16,
+            author: 'butter_bridge'
+        })
+    })
+    test('If article_id exists and inc_votes is supplied but is not a number: Status 400', async () => {
+        const newObj = { inc_votes: 'adam' };
+        const { body: { article } } = await request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(400);
+    })
+
     test('If valid id supplied but not found: Status 404', async () => {
         newObj = { inc_votes: -100 }
         const { body: { article } } = await request(app)
@@ -698,6 +751,37 @@ describe('DELETE api/articles/:article_id', () => {
             const { body: { comment } } = await request(app)
                 .get('/api/comments/bad')
                 .expect(400);
+        })
+    })
+
+
+    describe('GET /api/users/:username/comments', () => {
+        test('If user exists: Status 200 and returns comment', async () => {
+            const { body: { comments } } = await request(app)
+                .get('/api/users/icellusedkars/comments')
+                .expect(200);
+
+            expect(comments).toHaveLength(13);
+            comments.forEach(comment => {
+                expect(comment).toEqual(expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    author: 'icellusedkars',
+                    article_id: expect.any(Number),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    body: expect.any(String),
+                }))
+            })
+        })
+        test('If valid user but has no comments: Status 200 return empty array', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/users/lurker/comments')
+                .expect(200);
+        })
+        test('If valid username but no user exists: Status 404', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/users/valid/comments')
+                .expect(404);
         })
     })
 })

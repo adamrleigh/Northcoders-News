@@ -1,4 +1,4 @@
-const { selectUsers, selectUserById } = require('../models/users.model');
+const { selectUsers, selectUserById, selectUserComments } = require('../models/users.model');
 const { getThis } = require('./functions.controller')
 
 exports.getUsers = (req, res, next) =>
@@ -6,3 +6,6 @@ exports.getUsers = (req, res, next) =>
 
 exports.getUserById = (req, res, next) =>
     getThis(req, res, next, selectUserById, 'user');
+
+exports.getUserComments = (req, res, next) =>
+    getThis(req, res, next, selectUserComments, 'comments');

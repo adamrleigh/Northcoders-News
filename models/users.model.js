@@ -18,3 +18,15 @@ exports.selectUserById = async (req) => {
     return users[0];
 }
 
+exports.selectUserComments = async (req) => {
+    await this.selectUserById(req);
+    const { rows: comments } = await db.query(`
+    SELECT * FROM comments 
+    WHERE author = $1
+    ${req.query.limit ? `LIMIT ${req.query.limit} OFFSET ${((req.query.p || 1) - 1) * req.query.limit}` : ''}
+    `,
+        [req.params.username]
+    )
+    return comments;
+}
+
