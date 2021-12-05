@@ -11,7 +11,7 @@ beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
 describe('GET /api', () => {
-    test('Response 200 and returns endpoints.json', async () => {
+    test('Status 200 and returns endpoints.json', async () => {
         const { text } = await request(app).get('/api')
             .expect(200);
         expect(JSON.parse(text)).toEqual(endpoints)
@@ -57,47 +57,48 @@ describe('POST /api/topics', () => {
             }
         )
     })
+    describe('Invalid post requestes', () => {
+        test('Response 400 if insufficient arguments', async () => {
+            const newTopic = {
+                description: 'This is a new topic',
+            }
+            const { body: { message } } = await request(app)
+                .post('/api/topics')
+                .send(newTopic)
+                .expect(400)
+            expect(message).toEqual('Bad Request Error: too few arguments')
 
-    test('Response 400 if insufficient arguments', async () => {
-        const newTopic = {
-            description: 'This is a new topic',
-        }
-        const { body: { message } } = await request(app)
-            .post('/api/topics')
-            .send(newTopic)
-            .expect(400)
-        expect(message).toEqual('Bad Request Error: too few arguments')
+        })
+        test('Response 400 if too many arguments', async () => {
+            const newTopic = {
+                description: 'This is a new topic',
+                topic: 'This is a new topic',
+                id: 1
+            }
+            const { body: { message } } = await request(app)
+                .post('/api/topics')
+                .send(newTopic)
+                .expect(400)
+            expect(message).toEqual('Bad Request error: column "topic" of relation "topics" does not exist')
 
-    })
-    test('Response 400 if too many arguments', async () => {
-        const newTopic = {
-            description: 'This is a new topic',
-            topic: 'This is a new topic',
-            id: 1
-        }
-        const { body: { message } } = await request(app)
-            .post('/api/topics')
-            .send(newTopic)
-            .expect(400)
-        expect(message).toEqual('Bad Request error: column "topic" of relation "topics" does not exist')
+        })
+        test('Response 400 if invalid arguments', async () => {
+            const newTopic = {
+                description: 'This is a new topic',
+                not_topic: 'This should be an error'
+            }
+            const { body: { message } } = await request(app)
+                .post('/api/topics')
+                .send(newTopic)
+                .expect(400)
+            expect(message).toEqual('Bad Request error: column \"not_topic\" of relation \"topics\" does not exist')
 
-    })
-    test('Response 400 if invalid arguments', async () => {
-        const newTopic = {
-            description: 'This is a new topic',
-            not_topic: 'This should be an error'
-        }
-        const { body: { message } } = await request(app)
-            .post('/api/topics')
-            .send(newTopic)
-            .expect(400)
-        expect(message).toEqual('Bad Request error: column \"not_topic\" of relation \"topics\" does not exist')
-
+        })
     })
 })
 
 describe('GET /api/articles', () => {
-    test('Response 200 and returns object with key articles containing array of articles sorted by date_created desc', async () => {
+    test('Status 200 and returns object with key articles containing array of articles sorted by date_created desc', async () => {
         const { body: { articles } } = await request(app)
             .get('/api/articles')
             .expect(200);
@@ -117,84 +118,98 @@ describe('GET /api/articles', () => {
             }))
         })
     })
-    test('Sorted by sort_by query', async () => {
-        const { body: { articles } } = await request(app)
-            .get('/api/articles?sort_by=title&&order=asc')
-            .expect(200);
+    describe('Sort_by query', () => {
+        test('Sorted by valid sort_by query', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?sort_by=title&&order=asc')
+                .expect(200);
 
-        expect(articles).toHaveLength(12);
-        expect(articles).toBeSortedBy('title');
-        expect(articles).not.toBeSortedBy('author');
-        articles.forEach(article => {
-            expect(article).toEqual(expect.objectContaining({
-                article_id: expect.any(Number),
-                title: expect.any(String),
-                topic: expect.any(String),
-                author: expect.any(String),
-                body: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                comment_count: expect.any(String)
-            }))
+            expect(articles).toHaveLength(12);
+            expect(articles).toBeSortedBy('title');
+            expect(articles).not.toBeSortedBy('author');
+            articles.forEach(article => {
+                expect(article).toEqual(expect.objectContaining({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    comment_count: expect.any(String)
+                }))
+            })
+        })
+        test('Invalid sort_by query: status 400', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?sort_by=sesame&&order=asc')
+                .expect(400);
         })
     })
+    describe('Order query', () => {
+        test('Ordered by valid order query', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?sort_by=author&&order=desc')
+                .expect(200);
 
-    test('Ordered by order query', async () => {
-        const { body: { articles } } = await request(app)
-            .get('/api/articles?sort_by=author&&order=desc')
-            .expect(200);
-
-        expect(articles).toHaveLength(12);
-        expect(articles).toBeSortedBy('author', { descending: true });
-        expect(articles).not.toBeSortedBy('title');
-        articles.forEach(article => {
-            expect(article).toEqual(expect.objectContaining({
-                article_id: expect.any(Number),
-                title: expect.any(String),
-                topic: expect.any(String),
-                author: expect.any(String),
-                body: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                comment_count: expect.any(String)
-            }))
+            expect(articles).toHaveLength(12);
+            expect(articles).toBeSortedBy('author', { descending: true });
+            expect(articles).not.toBeSortedBy('title');
+            articles.forEach(article => {
+                expect(article).toEqual(expect.objectContaining({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    comment_count: expect.any(String)
+                }))
+            })
+        })
+        test('If order query invalid: Status 400', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?sort_by=author&&order=backwards')
+                .expect(400);
         })
     })
-    test('Filtered by topic if topic exists and has associated articles', async () => {
-        const { body: { articles } } = await request(app)
-            .get('/api/articles?topic=cats')
-            .expect(200);
+    describe('topic query', () => {
+        test('Filtered by topic if topic exists and has associated article(s)', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?topic=cats')
+                .expect(200);
 
-        expect(articles).toEqual(
-            [{
-                title: 'UNCOVERED: catspiracy to bring down democracy',
-                topic: 'cats',
-                author: 'rogersop',
-                body: 'Bastet walks amongst us, and the cats are taking arms!',
-                created_at: expect.any(String),
-                votes: 0,
-                comment_count: "2",
-                article_id: 5,
-                total_count: "1"
-            }]
-        )
+            expect(articles).toEqual(
+                [{
+                    title: 'UNCOVERED: catspiracy to bring down democracy',
+                    topic: 'cats',
+                    author: 'rogersop',
+                    body: 'Bastet walks amongst us, and the cats are taking arms!',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    comment_count: "2",
+                    article_id: 5,
+                    total_count: "1"
+                }]
+            )
+        })
+        test('If topic exists but has no associated articles: Status 200 and empty array', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?topic=paper')
+                .expect(200);
+
+            expect(articles).toEqual(
+                []
+            )
+        })
+
+        test('If topic does not exist: status 404', async () => {
+            const { body: { articles } } = await request(app)
+                .get('/api/articles?topic=not-a-topic')
+                .expect(404);
+        })
     })
-    test('Filtered by topic if topic exists but has no associated articles', async () => {
-        const { body: { articles } } = await request(app)
-            .get('/api/articles?topic=paper')
-            .expect(200);
-
-        expect(articles).toEqual(
-            []
-        )
-    })
-
-    test('If topic does not exist: status 404', async () => {
-        const { body: { articles } } = await request(app)
-            .get('/api/articles?topic=not-a-topic')
-            .expect(404);
-    })
-
 
     test('Results can be limited by limit query', async () => {
         const { body: { articles } } = await request(app)
@@ -218,7 +233,7 @@ describe('GET /api/articles', () => {
 })
 
 describe('GET /api/articles/:article_id', () => {
-    test('If article exists: Response 200 and returns object with key article containing correct article', async () => {
+    test('If article exists: Status 200 and returns object with key article containing correct article', async () => {
         const { body: { article } } = await request(app)
             .get('/api/articles/1')
             .expect(200)
@@ -234,23 +249,23 @@ describe('GET /api/articles/:article_id', () => {
             comment_count: "11",
         })
     })
-    test('if article_id is valid but not found: Response 400 and appropriate message ', async () => {
-        const { body: { message } } = await request(app)
-            .get('/api/articles/1000')
-            .expect(404)
-    })
+    describe('Bad article_id parameter', () => {
+        test('if article_id is valid but not found: Status 404', async () => {
+            const { body: { message } } = await request(app)
+                .get('/api/articles/1000')
+                .expect(404)
+        })
 
-    test('if article_id is invalid: Response 400 and appropriate message ', async () => {
-        const { body: { message } } = await request(app)
-            .get('/api/articles/bad')
-            .expect(400)
-
-        expect(message).toEqual('Bad Request error: invalid input syntax for type integer: \"bad\"')
+        test('if article_id is invalid: Response 400 ', async () => {
+            const { body: { message } } = await request(app)
+                .get('/api/articles/bad')
+                .expect(400);
+        })
     })
 })
 
 describe('GET /api/articles/:article_id/comments', () => {
-    test('If article_id exists and article has comments: Response 200 and returns array containing comment objects', async () => {
+    test('If article_id exists and article has comments: Status 200 and returns array containing comment objects', async () => {
         const { body: { comments } } = await request(app)
             .get('/api/articles/1/comments')
             .expect(200);
@@ -266,13 +281,13 @@ describe('GET /api/articles/:article_id/comments', () => {
             }))
         })
     })
-    test('If article_id exists but article has no comments: Response 200 and returns array containing comment objects', async () => {
+    test('If article_id exists but article has no comments: Response 200 and returns empty array', async () => {
         const { body: { comments } } = await request(app)
             .get('/api/articles/2/comments')
             .expect(200);
         expect(comments).toEqual([]);
     })
-    test('If article_id is valid but article not found: Response 404 and returns array containing comment objects', async () => {
+    test('If article_id is valid but article not found: Response 404', async () => {
         const { body: { comments } } = await request(app)
             .get('/api/articles/1000/comments')
             .expect(404);
@@ -319,7 +334,7 @@ describe('PATCH /api/articles/:article_id', () => {
             created_at: "2020-07-09T20:11:00.000Z",
         })
     })
-    test('If article_id exists and inc_votes is positive: Status 200 and returns updated article', async () => {
+    test('If article_id exists and inc_votes is negative: Status 200 and returns updated article', async () => {
         newObj = { inc_votes: -100 }
         const { body: { article } } = await request(app)
             .patch('/api/articles/1')
@@ -336,7 +351,7 @@ describe('PATCH /api/articles/:article_id', () => {
             created_at: "2020-07-09T20:11:00.000Z",
         })
     })
-    test('If extra arguments are supplied they are ignored', async () => {
+    test('If extra arguments are supplied they are ignored and only votes is altered', async () => {
         const newObj = { inc_votes: 100, title: 'hello there' };
         const { body: { article } } = await request(app)
             .patch('/api/articles/1')
@@ -379,8 +394,10 @@ describe('PATCH /api/articles/:article_id', () => {
     })
 })
 
+
+
 describe('PATCH /api/comments/:article_id', () => {
-    test('Response 200 and returns object with key comment containing comment object', async () => {
+    test('If article_id exists and inc_votes is positive: Status 200 and returns updated article', async () => {
         newObj = { inc_votes: 100 }
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -396,7 +413,70 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
+    test('If article_id exists and inc_votes is positive: Status 200 and returns updated article', async () => {
+        newObj = { inc_votes: -16 }
+        const { body: { comment } } = await request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(200);
+
+        expect(comment).toEqual({
+            article_id: 9,
+            "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            "comment_id": 1,
+            "created_at": "2020-04-06T12:17:00.000Z",
+            "votes": 0,
+            author: 'butter_bridge'
+        })
+    })
+    test('If extra arguments are supplied they are ignored and only votes is altered', async () => {
+        const newObj = { inc_votes: 100, title: 'hello there' };
+        const { body: { comment } } = await request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(200);
+
+        expect(comment).toEqual({
+            article_id: 9,
+            "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            "comment_id": 1,
+            "created_at": "2020-04-06T12:17:00.000Z",
+            "votes": 116,
+            author: 'butter_bridge'
+        })
+    })
+    test('If article_id exists and empty body supplied: Status 200 and return unchanged article', async () => {
+        const newObj = {};
+        const { body: { comment } } = await request(app)
+            .patch('/api/comments/1')
+            .send(newObj)
+            .expect(200);
+
+        expect(comment).toEqual({
+            article_id: 9,
+            "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            "comment_id": 1,
+            "created_at": "2020-04-06T12:17:00.000Z",
+            "votes": 16,
+            author: 'butter_bridge'
+        })
+    })
+    test('If valid id supplied but not found: Status 404', async () => {
+        newObj = { inc_votes: -100 }
+        const { body: { article } } = await request(app)
+            .patch('/api/comments/1000')
+            .send(newObj)
+            .expect(404);
+    })
 })
+
+
+
+
+
+
+
+
 
 describe('DELETE /api/comments/:comment_id', () => {
     test('If comment exists: Status 204', () => {
@@ -552,62 +632,24 @@ describe('POST /api/articles', () => {
         expect(message).toBe('Bad Request error: column \"corpus\" of relation \"articles\" does not exist')
     })
 })
-
-
-describe('Get /api/articles/:article_id/comments', () => {
-    test('Status 200 and comments returned in array', async () => {
-        const { body: { comments } } = await request(app)
-            .get('/api/articles/2/comments')
-            .expect(200);
-    })
-})
-
-
 describe('DELETE api/articles/:article_id', () => {
-    test('status 204', () => {
+    test('If article exists: Status 204', () => {
         return request(app)
             .delete('/api/articles/2')
             .expect(204)
     })
-})
-
-describe('GET api/users/:username', () => {
-    test('GET api/users/not-a-username status 404', async () => {
-        const { body: { user } } = await request(app)
-            .get('/api/users/not-a-username')
+    test('If valid ID but article does not exist: Status 404', () => {
+        return request(app)
+            .delete('/api/articles/1000')
             .expect(404)
     })
-})
-
-describe('PATCH api/comments/1000', () => {
-    test('GET api/users/not-a-username status 404', async () => {
-        const newBody = { inc_votes: 1 };
-        const { body: { comment } } = await request(app)
-            .patch('/api/users/not-a-username')
-            .send(newBody)
-            .expect(404);
-    })
-})
-
-describe('PATCH api/comments/1', () => {
-    test('Patch api/comments/1 status 404', async () => {
-        const newBody = { not_inc_votes: 1 };
-        const { body: { comment } } = await request(app)
-            .patch('/api/comments/1')
-            .send(newBody)
-            .expect(200);
-        expect(comment).toEqual({ "article_id": 9, "author": "butter_bridge", "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!", "comment_id": 1, "created_at": "2020-04-06T12:17:00.000Z", "votes": 16 });
+    test('If invalid ID: Status 400', () => {
+        return request(app)
+            .delete('/api/articles/adam')
+            .expect(400)
     })
 })
 
 
-describe('PATCH api/comments/1', () => {
-    test('Patch api/comments/1 status 404', async () => {
-        const newBody = { inc_votes: -16 };
-        const { body: { comment } } = await request(app)
-            .patch('/api/comments/1')
-            .send(newBody)
-            .expect(200);
-        expect(comment).toEqual({ "article_id": 9, "author": "butter_bridge", "body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!", "comment_id": 1, "created_at": "2020-04-06T12:17:00.000Z", "votes": 0 });
-    })
-})
+
+
