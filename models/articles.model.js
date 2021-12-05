@@ -34,7 +34,7 @@ exports.selectArticleById = async (req) => {
     ;`,
         [req.params.article_id]
     );
-    if (!articles[0]) throw { status: 404, message: 'error' }
+    if (!articles[0]) throw { status: 404, message: `article with article_id ${req.params.article_id} not found` }
     return articles[0];
 }
 
@@ -99,8 +99,7 @@ exports.addArticle = async (req) => {
 
 
 exports.removeArticle = async (req) => {
-    const { rows: articles } = await db.query(`SELECT article_id FROM articles WHERE article_id = $1`, [req.params.article_id]);
-    if (!articles[0]) throw { status: 404, message: 'error' }
+    await this.selectArticleById(req);
     db.query(`
     DELETE FROM articles WHERE article_id = $1;`,
         [req.params.article_id]

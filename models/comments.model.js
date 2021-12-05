@@ -20,7 +20,7 @@ exports.selectCommentById = async (req) => {
     ;`,
         [req.params.comment_id]
     );
-    if (!comments[0]) throw { status: 404, message: 'error' }
+    if (!comments[0]) throw { status: 404, message: `comment with comment_id ${req.params.comment_id} not found` }
     return comments[0];
 }
 

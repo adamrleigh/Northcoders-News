@@ -30,6 +30,6 @@ exports.selectTopicById = async (req) => {
     ;`,
         [req.query.topic]
     );
-    if (!topics[0]) throw { status: 404, message: 'error' }
+    if (!topics[0]) throw { status: 404, message: `topic with slug ${req.query.topic} not found` }
     return topics[0];
 }

@@ -14,7 +14,7 @@ exports.selectUserById = async (req) => {
     ;`,
         [req.params.username]
     );
-    if (!users[0]) throw { status: 404, message: 'error' }
+    if (!users[0]) throw { status: 404, message: `user with username ${req.params.username} not found` }
     return users[0];
 }
 
