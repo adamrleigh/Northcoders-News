@@ -16,7 +16,6 @@ exports.checkCommentExists = comment_id => checkQueryExists('comment_id', commen
 exports.checkUserExists = username => checkQueryExists('username', username, 'users');
 
 
-
 const queryDatabase = async (query, values) => {
     let body;
     if (values) body = await db.query(query, values);
