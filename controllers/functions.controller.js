@@ -1,7 +1,7 @@
-const { validateReq, validatePost, validatePatch } = require("./errors.controller")
+const { validatePost, checkExists } = require("./errors.controller")
+const db = require('../db/connection')
 
-const doThis = (req, res, next, fun, code, key = null) => {
-    validateReq(req);
+const doThis = async (req, res, next, fun, code, key = null) => {
     fun(req)
         .then((result) => {
             if (key === null) res.status(code).send();
@@ -17,15 +17,13 @@ const doThis = (req, res, next, fun, code, key = null) => {
 exports.getThis = (req, res, next, fun, key) =>
     doThis(req, res, next, fun, 200, key);
 
-exports.patchThis = (req, res, next, fun, key) => {
-    validatePatch(req.body);
-    return doThis(req, res, next, fun, 200, key);
-}
+exports.patchThis = (req, res, next, fun, key) =>
+    doThis(req, res, next, fun, 200, key);
 
-exports.postThis = (req, res, next, fun, key) => {
-    validatePost(req, key + 's');
-    return doThis(req, res, next, fun, 201, key);
-}
+
+exports.postThis = (req, res, next, fun, key) =>
+    doThis(req, res, next, fun, 201, key);
+
 
 exports.deleteThis = (req, res, next, fun) =>
     doThis(req, res, next, fun, 204);

@@ -13,7 +13,7 @@ exports.getArticleComments = (req, res, next) =>
     getThis(req, res, next, selectArticleComments, 'comments');
 
 exports.patchArticle = (req, res, next) =>
-    patchThis(req, res, next, updateArticle, 'article');
+    patchThis(req, res, next, updateArticle, 'article')
 
 exports.postComment = (req, res, next) =>
     postThis(req, res, next, addComment, 'comment');

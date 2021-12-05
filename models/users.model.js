@@ -1,16 +1,21 @@
 const db = require('../db/connection');
-const { queryDatabase, queryDatabaseById } = require('./functions.model');
 
-exports.selectUsers = () =>
-    queryDatabase(`
+exports.selectUsers = async () => {
+    const { rows } = await db.query(`
     SELECT username FROM users
     `);
+    return rows;
+}
 
-exports.selectUserById = (req) =>
-    queryDatabaseById(`
+exports.selectUserById = async (req) => {
+    const { rows: users } = await db.query(`SELECT username FROM users WHERE username = $1`, [req.params.username]);
+    if (!users[0]) throw { status: 404, message: 'error' }
+    const { rows } = await db.query(`
     SELECT * FROM users
     WHERE username = $1
     `,
         [req.params.username]
     );
+    return rows[0];
+}
 

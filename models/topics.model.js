@@ -1,18 +1,23 @@
 const db = require('../db/connection');
-const { queryDatabase, queryDatabaseById } = require('./functions.model');
+const format = require('pg-format')
 
-exports.selectTopics = () =>
-    queryDatabase(`
+exports.selectTopics = async () => {
+    const { rows } = await db.query(`
     SELECT * FROM topics
     `);
+    return rows;
+}
 
-exports.addTopic = (req) =>
-    queryDatabaseById(`
+exports.addTopic = async (req) => {
+    const { rows } = await db.query(
+        format(`
     INSERT INTO topics 
-    (description, slug)
+    (%I, %I)
     VALUES
     ($1, $2)
     RETURNING *;`,
+            ...Object.keys(req.body)),
         [...Object.values(req.body)]
     );
-
+    return rows[0];
+}
