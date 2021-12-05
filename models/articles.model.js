@@ -34,7 +34,7 @@ exports.selectArticleById = async (req) => {
     ;`,
         [req.params.article_id]
     );
-    if (!articles[0]) throw { status: 404, message: `article with article_id ${req.params.article_id} not found` }
+    if (!articles[0]) throw { status: 404, message: `article with article_id '${req.params.article_id}' not found` }
     return articles[0];
 }
 
