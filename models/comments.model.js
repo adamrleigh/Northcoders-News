@@ -1,5 +1,24 @@
 const db = require('../db/connection');
 
+exports.selectComments = async (req) => {
+    const { rows: comments } = await db.query(`
+    SELECT * FROM comments;`,
+    );
+    return comments;
+}
+
+exports.selectCommentById = async (req) => {
+    const { rows: comments } = await db.query(`
+    SELECT * FROM comments
+    WHERE comment_id = $1
+    ;`,
+        [req.params.comment_id]
+    );
+    if (!comments[0]) throw { status: 404, message: `comment with comment_id '${req.params.comment_id}' not found` }
+    return comments[0];
+}
+
+
 exports.updateComment = async (req) => {
     await this.selectCommentById(req);
     const { rows } = await db.query(`
@@ -13,16 +32,7 @@ exports.updateComment = async (req) => {
     return rows[0]
 }
 
-exports.selectCommentById = async (req) => {
-    const { rows: comments } = await db.query(`
-    SELECT * FROM comments
-    WHERE comment_id = $1
-    ;`,
-        [req.params.comment_id]
-    );
-    if (!comments[0]) throw { status: 404, message: `comment with comment_id '${req.params.comment_id}' not found` }
-    return comments[0];
-}
+
 
 exports.removeComment = async (req) => {
     await this.selectCommentById(req);

@@ -653,6 +653,53 @@ describe('DELETE api/articles/:article_id', () => {
             .delete('/api/articles/adam')
             .expect(400)
     })
+
+    describe('GET /api/comments', () => {
+        test('Status 200 and returns array of all comments', async () => {
+            const { body: { comments } } = await request(app)
+                .get('/api/comments')
+                .expect(200);
+
+            expect(comments).toHaveLength(18);
+            comments.forEach(comment => {
+                expect(comment).toEqual(expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    author: expect.any(String),
+                    article_id: expect.any(Number),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    body: expect.any(String),
+                }))
+            })
+        })
+    })
+
+    describe('GET /api/comments/:comment_id', () => {
+        test('If comment exists: Status 200 and returns comment', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/comments/1')
+                .expect(200);
+
+            expect(comment).toEqual({
+                article_id: 9,
+                author: "butter_bridge",
+                body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                comment_id: 1,
+                created_at: "2020-04-06T12:17:00.000Z",
+                votes: 16
+            });
+        })
+        test('If valid id but comment does not exist: Status 404', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/comments/1000')
+                .expect(404);
+        })
+        test('If invalid id: Status 400', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/comments/bad')
+                .expect(400);
+        })
+    })
 })
 
 

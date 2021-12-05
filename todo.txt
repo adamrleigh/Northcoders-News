@@ -1,0 +1,1 @@
+add comments endpoints to endpoints.json
