@@ -41,7 +41,7 @@ describe('GET /api/topics', () => {
 })
 
 describe('POST /api/topics', () => {
-    test('If topic valid and exists: Status 201 and return topic', async () => {
+    test('If new topic valid and exists: Status 201 and return topic', async () => {
         const newTopic = {
             description: 'This is a new topic',
             slug: 'This is a new slug'
@@ -57,8 +57,8 @@ describe('POST /api/topics', () => {
             }
         )
     })
-    describe('Invalid post requestes', () => {
-        test('Response 400 if insufficient arguments', async () => {
+    describe('Invalid post requests', () => {
+        test('If insufficient arguments: status 400', async () => {
             const newTopic = {
                 description: 'This is a new topic',
             }
@@ -69,7 +69,7 @@ describe('POST /api/topics', () => {
             expect(message).toEqual('Bad Request Error: too few arguments')
 
         })
-        test('Response 400 if too many arguments', async () => {
+        test('If too many arguments: status 400', async () => {
             const newTopic = {
                 description: 'This is a new topic',
                 topic: 'This is a new topic',
@@ -82,7 +82,7 @@ describe('POST /api/topics', () => {
             expect(message).toEqual('Bad Request error: column "topic" of relation "topics" does not exist')
 
         })
-        test('Response 400 if invalid arguments', async () => {
+        test('If invalid arguments: status 400', async () => {
             const newTopic = {
                 description: 'This is a new topic',
                 not_topic: 'This should be an error'
@@ -813,11 +813,78 @@ describe('DELETE api/articles/:article_id', () => {
         })
         test('If topic does not exist: Status 404', () => {
             return request(app)
-                .delete('/api/toipcs/bbq')
+                .delete('/api/topics/bbq')
                 .expect(404)
         })
     })
 
+    describe('DELETE /api/users/:username', () => {
+        test('If user exists: Status 204', () => {
+            return request(app)
+                .delete('/api/users/lurker')
+                .expect(204)
+        })
+        test('If user does not exist: Status 404', () => {
+            return request(app)
+                .delete('/api/users/adam')
+                .expect(404)
+        })
+    })
+
+
+    describe('POST /api/users', () => {
+        test('If new user valid and exists: Status 201 and return topic', async () => {
+            const newUser = {
+                username: 'adam',
+                avatar_url: 'www.google.com',
+                name: 'adam'
+            };
+            const { body: { user } } = await request(app)
+                .post('/api/users')
+                .send(newUser)
+                .expect(201)
+            expect(user).toEqual({
+                username: 'adam',
+                avatar_url: 'www.google.com',
+                name: 'adam'
+            })
+        })
+        describe('Invalid post requests', () => {
+            test('Response 400 if insufficient arguments', async () => {
+                const newUser = {
+                    username: 'adam',
+                    avatar_url: 'www.google.com',
+                };
+                const { body: { user } } = await request(app)
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+            })
+            test('Response 400 if too many arguments', async () => {
+                const newUser = {
+                    username: 'adam',
+                    avatar_url: 'www.google.com',
+                    name: 'adam',
+                    age: 99
+                };
+                const { body: { user } } = await request(app)
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+            })
+            test('Response 400 if invalid arguments', async () => {
+                const newUser = {
+                    username: 'adam',
+                    avatar_url: 'www.google.com',
+                    temperature: 'mild'
+                };
+                const { body: { user } } = await request(app)
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+            })
+        })
+    })
 })
 
 

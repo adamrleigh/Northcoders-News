@@ -1,14 +1,16 @@
 const usersRouter = require('express').Router();
-const { getUsers, getUserById, getUserComments } = require('../controllers/users.controller');
+const { getUsers, postUser, getUserById, getUserComments, deleteUser } = require('../controllers/users.controller');
 
 
 usersRouter
     .route('/')
-    .get(getUsers);
+    .get(getUsers)
+    .post(postUser);
 
 usersRouter
     .route('/:username')
-    .get(getUserById);
+    .get(getUserById)
+    .delete(deleteUser);
 
 usersRouter
     .route('/:username/comments')

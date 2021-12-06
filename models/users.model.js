@@ -1,4 +1,5 @@
 const db = require('../db/connection');
+const format = require('pg-format');
 
 exports.selectUsers = async () => {
     const { rows: users } = await db.query(`
@@ -30,3 +31,26 @@ exports.selectUserComments = async (req) => {
     return comments;
 }
 
+exports.removeUser = async (req) => {
+    await this.selectUserById(req);
+    db.query(`
+    DELETE FROM users WHERE username = $1;`,
+        [req.params.username]
+    );
+}
+
+
+
+exports.addUser = async (req) => {
+    const { rows } = await db.query(
+        format(`
+        INSERT INTO users
+        (%I, %I, %I)
+        VALUES
+        ($1, $2, $3)
+        RETURNING *;`,
+            ...Object.keys(req.body)),
+        [...Object.values(req.body)]
+    );
+    return rows[0];
+};
