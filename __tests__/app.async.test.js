@@ -429,8 +429,8 @@ describe('PATCH /api/articles/:article_id', () => {
 
 
 
-describe('PATCH /api/comments/:article_id', () => {
-    test('If article_id exists and inc_votes is positive: Status 200 and returns updated article', async () => {
+describe('PATCH /api/comments/:comment_id', () => {
+    test('If comment exists and inc_votes is positive: Status 200 and returns updated article', async () => {
         newObj = { inc_votes: 100 }
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -446,7 +446,7 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
-    test('If article_id exists and inc_votes is negative: Status 200 and returns updated article', async () => {
+    test('If comment exists and inc_votes is negative: Status 200 and returns updated article', async () => {
         newObj = { inc_votes: -16 }
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -478,7 +478,7 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
-    test('If article_id exists and empty body supplied: Status 200 and return unchanged article', async () => {
+    test('If comment exists and empty body supplied: Status 200 and return unchanged article', async () => {
         const newObj = {};
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -494,7 +494,7 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
-    test('If article_id exists and body without inc_votes supplied: Status 200 and return unchanged article', async () => {
+    test('If comment exists and body without inc_votes supplied: Status 200 and return unchanged article', async () => {
         const newObj = { not_inc_votes: 100 };
         const { body: { comment } } = await request(app)
             .patch('/api/comments/1')
@@ -510,7 +510,7 @@ describe('PATCH /api/comments/:article_id', () => {
             author: 'butter_bridge'
         })
     })
-    test('If article_id exists and inc_votes is supplied but is not a number: Status 400', async () => {
+    test('If comment exists and inc_votes is supplied but is not a number: Status 400', async () => {
         const newObj = { inc_votes: 'adam' };
         const { body: { article } } = await request(app)
             .patch('/api/comments/1')
