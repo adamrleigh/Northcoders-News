@@ -36,7 +36,6 @@ exports.addTopic = async (req) => {
 
 exports.removeTopic = async (req) => {
     await this.selectTopicById(req);
-    console.log(req.params.slug)
     db.query(`
     DELETE FROM topics WHERE slug = $1;`,
         [req.params.slug]
