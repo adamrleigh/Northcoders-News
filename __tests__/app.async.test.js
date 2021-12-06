@@ -784,6 +784,40 @@ describe('DELETE api/articles/:article_id', () => {
                 .expect(404);
         })
     })
+
+
+    describe('GET /api/topics/:slug', () => {
+        test('If topic exists: Status 200 and returns topic', async () => {
+            const { body: { topic } } = await request(app)
+                .get('/api/topics/cats')
+                .expect(200);
+
+            expect(topic).toEqual({
+                slug: 'cats',
+                description: 'Not dogs'
+            });
+        })
+        test('If topic does not exist: Status 404', async () => {
+            const { body: { comment } } = await request(app)
+                .get('/api/topics/bbq')
+                .expect(404);
+        })
+    })
+
+
+    describe('DELETE /api/topics/:slug', () => {
+        test('If topic exists: Status 204', () => {
+            return request(app)
+                .delete('/api/topics/cats')
+                .expect(204)
+        })
+        test('If topic does not exist: Status 404', () => {
+            return request(app)
+                .delete('/api/toipcs/bbq')
+                .expect(404)
+        })
+    })
+
 })
 
 

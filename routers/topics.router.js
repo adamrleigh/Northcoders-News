@@ -1,5 +1,5 @@
 const topicsRouter = require('express').Router();
-const { getTopics, postTopic } = require('../controllers/topics.controller');
+const { getTopics, getTopicById, postTopic, deleteTopic } = require('../controllers/topics.controller');
 
 
 topicsRouter
@@ -7,5 +7,9 @@ topicsRouter
     .get(getTopics)
     .post(postTopic);
 
+topicsRouter
+    .route('/:slug')
+    .get(getTopicById)
+    .delete(deleteTopic);
 
 module.exports = topicsRouter;

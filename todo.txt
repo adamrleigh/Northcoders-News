@@ -1,2 +1,4 @@
 add comments endpoints to endpoints.json
 add get comments by users to endpoints.json
+add delete and get topics by id to endpoints.json
+add more queries to endpoints

@@ -9,6 +9,17 @@ exports.selectTopics = async () => {
     return rows;
 }
 
+exports.selectTopicById = async (req) => {
+    const { rows: topics } = await db.query(`
+    SELECT * FROM topics
+    WHERE slug = $1
+    ;`,
+        [req.params.slug]
+    );
+    if (!topics[0]) throw { status: 404, message: `topic with slug '${req.params.slug}' not found` }
+    return topics[0];
+}
+
 exports.addTopic = async (req) => {
     const { rows } = await db.query(
         format(`
@@ -23,13 +34,11 @@ exports.addTopic = async (req) => {
     return rows[0];
 }
 
-exports.selectTopicById = async (req) => {
-    const { rows: topics } = await db.query(`
-    SELECT * FROM topics
-    WHERE slug = $1
-    ;`,
-        [req.query.topic]
+exports.removeTopic = async (req) => {
+    await this.selectTopicById(req);
+    console.log(req.params.slug)
+    db.query(`
+    DELETE FROM topics WHERE slug = $1;`,
+        [req.params.slug]
     );
-    if (!topics[0]) throw { status: 404, message: `topic with slug '${req.query.topic}' not found` }
-    return topics[0];
 }

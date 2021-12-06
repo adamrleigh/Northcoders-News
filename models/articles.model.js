@@ -6,7 +6,7 @@ const articleSelection = 'articles.*, COUNT(comments.comment_id) AS comment_coun
 
 exports.selectArticles = async (req) => {
 
-    if (req.query.topic) await selectTopicById(req);
+    if (req.query.topic) await selectTopicById({ params: { slug: req.query.topic } });
 
     const selection = articleSelection + ',COUNT(DISTINCT articles.article_id) AS total_count'
     const query = format(`SELECT ${selection} FROM articles
