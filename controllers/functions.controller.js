@@ -15,6 +15,7 @@ const doThis = async (req, res, next, fun, code, key = null) => {
         .catch(next)
 };
 
+
 exports.getThis = (req, res, next, fun, key) =>
     doThis(req, res, next, fun, 200, key);
 
