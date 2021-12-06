@@ -21,15 +21,13 @@ exports.selectTopicById = async (req) => {
 }
 
 exports.addTopic = async (req) => {
-    const { rows } = await db.query(
-        format(`
+    const { rows } = await db.query(`
     INSERT INTO topics 
-    (%I, %I)
+    (slug, description)
     VALUES
     ($1, $2)
     RETURNING *;`,
-            ...Object.keys(req.body)),
-        [...Object.values(req.body)]
+        [req.body.slug, req.body.description]
     );
     return rows[0];
 }

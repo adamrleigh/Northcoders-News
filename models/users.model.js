@@ -39,18 +39,14 @@ exports.removeUser = async (req) => {
     );
 }
 
-
-
 exports.addUser = async (req) => {
-    const { rows } = await db.query(
-        format(`
+    const { rows } = await db.query(`
         INSERT INTO users
-        (%I, %I, %I)
+        (username, avatar_url, name)
         VALUES
         ($1, $2, $3)
         RETURNING *;`,
-            ...Object.keys(req.body)),
-        [...Object.values(req.body)]
+        [req.body.username, req.body.avatar_url, req.body.name]
     );
     return rows[0];
 };

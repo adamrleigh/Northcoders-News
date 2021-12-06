@@ -66,20 +66,23 @@ describe('POST /api/topics', () => {
                 .post('/api/topics')
                 .send(newTopic)
                 .expect(400)
-            expect(message).toEqual('Bad Request Error: too few arguments')
+            expect(message).toEqual("Bad Request error: null value in column \"slug\" violates not-null constraint")
 
         })
-        test('If too many arguments: status 400', async () => {
+        test('If too many arguments but all essential arguments: status 201', async () => {
             const newTopic = {
                 description: 'This is a new topic',
-                topic: 'This is a new topic',
+                slug: 'This is a new topic',
                 id: 1
             }
-            const { body: { message } } = await request(app)
+            const { body: { topic } } = await request(app)
                 .post('/api/topics')
                 .send(newTopic)
-                .expect(400)
-            expect(message).toEqual('Bad Request error: column "topic" of relation "topics" does not exist')
+                .expect(201)
+            expect(topic).toEqual({
+                description: 'This is a new topic',
+                slug: 'This is a new topic'
+            })
 
         })
         test('If invalid arguments: status 400', async () => {
@@ -91,7 +94,7 @@ describe('POST /api/topics', () => {
                 .post('/api/topics')
                 .send(newTopic)
                 .expect(400)
-            expect(message).toEqual('Bad Request error: column \"not_topic\" of relation \"topics\" does not exist')
+            expect(message).toEqual('Bad Request error: null value in column \"slug\" violates not-null constraint')
 
         })
     })
@@ -591,7 +594,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             "votes": 0,
         })
     })
-    test('If article exists and invalid comment: Status 400', async () => {
+    test('If article exists and valid comment with extra argument: Status 201', async () => {
         const newComment = {
             author: `lurker`,
             body: `Yes, good`,
@@ -600,7 +603,15 @@ describe('POST /api/articles/:article_id/comments', () => {
         const { body: { comment } } = await request(app)
             .post('/api/articles/2/comments')
             .send(newComment)
-            .expect(400)
+            .expect(201);
+        expect(comment).toEqual({
+            article_id: 2,
+            author: 'lurker',
+            body: 'Yes, good',
+            comment_id: expect.any(Number),
+            created_at: expect.any(String),
+            votes: 0
+        })
     })
     test('If article_id valid but does not exist: Status 404', async () => {
         const newComment = {
@@ -642,7 +653,7 @@ describe('POST /api/articles', () => {
             })
     })
 
-    test('If too many arguments suppplied: Status 400', async () => {
+    test('If too many arguments suppplied but contains all essential arguments: Status 201', async () => {
         const newArticle = {
             title: "testArticle",
             topic: "mitch",
@@ -650,12 +661,21 @@ describe('POST /api/articles', () => {
             body: "Lorem ipsum dolor sit amet",
             article_id: 1
         }
-        const { body: { message } } = await request(app)
+        const { body: { article } } = await request(app)
             .post('/api/articles')
             .send(newArticle)
-            .expect(400)
+            .expect(201)
 
-        expect(message).toBe('Bad Request error: bind message supplies 5 parameters, but prepared statement "" requires 4')
+        expect(article).toEqual({
+            title: "testArticle",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "Lorem ipsum dolor sit amet",
+            article_id: expect.any(Number),
+            comment_count: "0",
+            created_at: expect.any(String),
+            votes: 0
+        })
     })
     test('If too few arguments supplied: Status 400', async () => {
         const newArticle = {
@@ -668,7 +688,7 @@ describe('POST /api/articles', () => {
             .send(newArticle)
             .expect(400)
 
-        expect(message).toBe('Bad Request Error: too few arguments')
+        expect(message).toBe('Bad Request error: null value in column \"body\" violates not-null constraint')
 
     })
     test('If correct number, but invalid arguments suppplied', async () => {
@@ -683,7 +703,7 @@ describe('POST /api/articles', () => {
             .send(newArticle)
             .expect(400)
 
-        expect(message).toBe('Bad Request error: column \"corpus\" of relation \"articles\" does not exist')
+        expect(message).toBe('Bad Request error: null value in column \"body\" violates not-null constraint')
     })
 })
 describe('DELETE api/articles/:article_id', () => {
@@ -702,186 +722,191 @@ describe('DELETE api/articles/:article_id', () => {
             .delete('/api/articles/adam')
             .expect(400)
     })
+})
+describe('GET /api/comments', () => {
+    test('Status 200 and returns array of all comments', async () => {
+        const { body: { comments } } = await request(app)
+            .get('/api/comments')
+            .expect(200);
 
-    describe('GET /api/comments', () => {
-        test('Status 200 and returns array of all comments', async () => {
-            const { body: { comments } } = await request(app)
-                .get('/api/comments')
-                .expect(200);
-
-            expect(comments).toHaveLength(18);
-            comments.forEach(comment => {
-                expect(comment).toEqual(expect.objectContaining({
-                    comment_id: expect.any(Number),
-                    author: expect.any(String),
-                    article_id: expect.any(Number),
-                    votes: expect.any(Number),
-                    created_at: expect.any(String),
-                    body: expect.any(String),
-                }))
-            })
+        expect(comments).toHaveLength(18);
+        comments.forEach(comment => {
+            expect(comment).toEqual(expect.objectContaining({
+                comment_id: expect.any(Number),
+                author: expect.any(String),
+                article_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                body: expect.any(String),
+            }))
         })
     })
+})
+describe('GET /api/comments/:comment_id', () => {
+    test('If comment exists: Status 200 and returns comment', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/comments/1')
+            .expect(200);
 
-    describe('GET /api/comments/:comment_id', () => {
-        test('If comment exists: Status 200 and returns comment', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/comments/1')
-                .expect(200);
+        expect(comment).toEqual({
+            article_id: 9,
+            author: "butter_bridge",
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            comment_id: 1,
+            created_at: "2020-04-06T12:17:00.000Z",
+            votes: 16
+        });
+    })
+    test('If valid id but comment does not exist: Status 404', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/comments/1000')
+            .expect(404);
+    })
+    test('If invalid id: Status 400', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/comments/bad')
+            .expect(400);
+    })
+})
 
-            expect(comment).toEqual({
-                article_id: 9,
-                author: "butter_bridge",
-                body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-                comment_id: 1,
-                created_at: "2020-04-06T12:17:00.000Z",
-                votes: 16
-            });
-        })
-        test('If valid id but comment does not exist: Status 404', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/comments/1000')
-                .expect(404);
-        })
-        test('If invalid id: Status 400', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/comments/bad')
-                .expect(400);
+
+describe('GET /api/users/:username/comments', () => {
+    test('If user exists: Status 200 and returns comment', async () => {
+        const { body: { comments } } = await request(app)
+            .get('/api/users/icellusedkars/comments')
+            .expect(200);
+
+        expect(comments).toHaveLength(13);
+        comments.forEach(comment => {
+            expect(comment).toEqual(expect.objectContaining({
+                comment_id: expect.any(Number),
+                author: 'icellusedkars',
+                article_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                body: expect.any(String),
+            }))
         })
     })
+    test('If valid user but has no comments: Status 200 return empty array', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/users/lurker/comments')
+            .expect(200);
+    })
+    test('If valid username but no user exists: Status 404', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/users/valid/comments')
+            .expect(404);
+    })
+})
 
 
-    describe('GET /api/users/:username/comments', () => {
-        test('If user exists: Status 200 and returns comment', async () => {
-            const { body: { comments } } = await request(app)
-                .get('/api/users/icellusedkars/comments')
-                .expect(200);
+describe('GET /api/topics/:slug', () => {
+    test('If topic exists: Status 200 and returns topic', async () => {
+        const { body: { topic } } = await request(app)
+            .get('/api/topics/cats')
+            .expect(200);
 
-            expect(comments).toHaveLength(13);
-            comments.forEach(comment => {
-                expect(comment).toEqual(expect.objectContaining({
-                    comment_id: expect.any(Number),
-                    author: 'icellusedkars',
-                    article_id: expect.any(Number),
-                    votes: expect.any(Number),
-                    created_at: expect.any(String),
-                    body: expect.any(String),
-                }))
-            })
-        })
-        test('If valid user but has no comments: Status 200 return empty array', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/users/lurker/comments')
-                .expect(200);
-        })
-        test('If valid username but no user exists: Status 404', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/users/valid/comments')
-                .expect(404);
+        expect(topic).toEqual({
+            slug: 'cats',
+            description: 'Not dogs'
+        });
+    })
+    test('If topic does not exist: Status 404', async () => {
+        const { body: { comment } } = await request(app)
+            .get('/api/topics/bbq')
+            .expect(404);
+    })
+})
+
+
+describe('DELETE /api/topics/:slug', () => {
+    test('If topic exists: Status 204', () => {
+        return request(app)
+            .delete('/api/topics/cats')
+            .expect(204)
+    })
+    test('If topic does not exist: Status 404', () => {
+        return request(app)
+            .delete('/api/topics/bbq')
+            .expect(404)
+    })
+})
+
+describe('DELETE /api/users/:username', () => {
+    test('If user exists: Status 204', () => {
+        return request(app)
+            .delete('/api/users/lurker')
+            .expect(204)
+    })
+    test('If user does not exist: Status 404', () => {
+        return request(app)
+            .delete('/api/users/adam')
+            .expect(404)
+    })
+})
+
+
+describe('POST /api/users', () => {
+    test('If new user valid and exists: Status 201 and return topic', async () => {
+        const newUser = {
+            username: 'adam',
+            avatar_url: 'www.google.com',
+            name: 'adam'
+        };
+        const { body: { user } } = await request(app)
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+        expect(user).toEqual({
+            username: 'adam',
+            avatar_url: 'www.google.com',
+            name: 'adam'
         })
     })
+    test('If too many arguments but contains essential data: Status 201', async () => {
+        const newUser = {
+            username: 'adam',
+            avatar_url: 'www.google.com',
+            name: 'adam',
+            age: 99
+        };
+        const { body: { user } } = await request(app)
+            .post('/api/users')
+            .send(newUser)
+            .expect(201);
 
-
-    describe('GET /api/topics/:slug', () => {
-        test('If topic exists: Status 200 and returns topic', async () => {
-            const { body: { topic } } = await request(app)
-                .get('/api/topics/cats')
-                .expect(200);
-
-            expect(topic).toEqual({
-                slug: 'cats',
-                description: 'Not dogs'
-            });
-        })
-        test('If topic does not exist: Status 404', async () => {
-            const { body: { comment } } = await request(app)
-                .get('/api/topics/bbq')
-                .expect(404);
-        })
-    })
-
-
-    describe('DELETE /api/topics/:slug', () => {
-        test('If topic exists: Status 204', () => {
-            return request(app)
-                .delete('/api/topics/cats')
-                .expect(204)
-        })
-        test('If topic does not exist: Status 404', () => {
-            return request(app)
-                .delete('/api/topics/bbq')
-                .expect(404)
+        expect(user).toEqual({
+            username: 'adam',
+            avatar_url: 'www.google.com',
+            name: 'adam',
         })
     })
-
-    describe('DELETE /api/users/:username', () => {
-        test('If user exists: Status 204', () => {
-            return request(app)
-                .delete('/api/users/lurker')
-                .expect(204)
-        })
-        test('If user does not exist: Status 404', () => {
-            return request(app)
-                .delete('/api/users/adam')
-                .expect(404)
-        })
-    })
-
-
-    describe('POST /api/users', () => {
-        test('If new user valid and exists: Status 201 and return topic', async () => {
+    describe('Invalid post requests', () => {
+        test('Response 400 if insufficient arguments', async () => {
             const newUser = {
                 username: 'adam',
                 avatar_url: 'www.google.com',
-                name: 'adam'
             };
             const { body: { user } } = await request(app)
                 .post('/api/users')
                 .send(newUser)
-                .expect(201)
-            expect(user).toEqual({
+                .expect(400)
+        })
+        test('Response 400 if invalid arguments', async () => {
+            const newUser = {
                 username: 'adam',
                 avatar_url: 'www.google.com',
-                name: 'adam'
-            })
-        })
-        describe('Invalid post requests', () => {
-            test('Response 400 if insufficient arguments', async () => {
-                const newUser = {
-                    username: 'adam',
-                    avatar_url: 'www.google.com',
-                };
-                const { body: { user } } = await request(app)
-                    .post('/api/users')
-                    .send(newUser)
-                    .expect(400)
-            })
-            test('Response 400 if too many arguments', async () => {
-                const newUser = {
-                    username: 'adam',
-                    avatar_url: 'www.google.com',
-                    name: 'adam',
-                    age: 99
-                };
-                const { body: { user } } = await request(app)
-                    .post('/api/users')
-                    .send(newUser)
-                    .expect(400)
-            })
-            test('Response 400 if invalid arguments', async () => {
-                const newUser = {
-                    username: 'adam',
-                    avatar_url: 'www.google.com',
-                    temperature: 'mild'
-                };
-                const { body: { user } } = await request(app)
-                    .post('/api/users')
-                    .send(newUser)
-                    .expect(400)
-            })
+                temperature: 'mild'
+            };
+            const { body: { user } } = await request(app)
+                .post('/api/users')
+                .send(newUser)
+                .expect(400)
         })
     })
 })
+
 
 
 
