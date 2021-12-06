@@ -111,7 +111,6 @@ describe('GET /api/articles', () => {
                 title: expect.any(String),
                 topic: expect.any(String),
                 author: expect.any(String),
-                body: expect.any(String),
                 created_at: expect.any(String),
                 votes: expect.any(Number),
                 comment_count: expect.any(String)
@@ -133,7 +132,6 @@ describe('GET /api/articles', () => {
                     title: expect.any(String),
                     topic: expect.any(String),
                     author: expect.any(String),
-                    body: expect.any(String),
                     created_at: expect.any(String),
                     votes: expect.any(Number),
                     comment_count: expect.any(String)
@@ -161,7 +159,6 @@ describe('GET /api/articles', () => {
                     title: expect.any(String),
                     topic: expect.any(String),
                     author: expect.any(String),
-                    body: expect.any(String),
                     created_at: expect.any(String),
                     votes: expect.any(Number),
                     comment_count: expect.any(String)
@@ -185,7 +182,6 @@ describe('GET /api/articles', () => {
                     title: 'UNCOVERED: catspiracy to bring down democracy',
                     topic: 'cats',
                     author: 'rogersop',
-                    body: 'Bastet walks amongst us, and the cats are taking arms!',
                     created_at: expect.any(String),
                     votes: 0,
                     comment_count: "2",
@@ -242,8 +238,8 @@ describe('GET /api/articles/:article_id', () => {
         expect(article).toEqual({
             article_id: 1,
             title: 'Living in the shadow of a great man',
-            body: 'I find this existence challenging',
             votes: 100,
+            body: "I find this existence challenging",
             topic: 'mitch',
             author: 'butter_bridge',
             created_at: "2020-07-09T20:11:00.000Z",
