@@ -9,7 +9,8 @@ exports.selectArticles = async (req) => {
   if (req.query.topic)
     await selectTopicById({ params: { slug: req.query.topic } });
 
-  const selection = articleSelection + ",COUNT(articles.title) AS total_count";
+  const selection =
+    articleSelection + ",COUNT(articles.article_id) AS total_count";
   const query = format(
     `SELECT ${selection} FROM articles
     LEFT OUTER JOIN comments ON articles.article_id = comments.article_id
