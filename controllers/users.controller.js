@@ -20,7 +20,7 @@ exports.postUser = (req, res, next) =>
 exports.getUserComments = (req, res, next) =>
   getThis(req, res, next, selectUserComments, "comments");
 
-exports.getUserComments = (req, res, next) =>
-  getThis(req, res, next, selectUserArticles, "comments");
+exports.getUserArticles = (req, res, next) =>
+  getThis(req, res, next, selectUserArticles, "articles");
 
 exports.deleteUser = (req, res, next) => deleteThis(req, res, next, removeUser);
