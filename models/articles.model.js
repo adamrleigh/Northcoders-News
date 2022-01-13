@@ -56,7 +56,7 @@ exports.selectArticleComments = async (req) => {
   await this.selectArticleById(req);
   const { rows: comments } = await db.query(
     `
-    SELECT comment_id, votes, created_at, author, body FROM comments 
+    SELECT comment_id, votes, created_at, author, body, COUNT(*) OVER () AS total_count FROM comments 
     WHERE comments.article_id = $1
     ${
       req.query.limit
