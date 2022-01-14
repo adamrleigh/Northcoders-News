@@ -54,10 +54,11 @@ exports.selectArticleById = async (req) => {
 
 exports.selectArticleComments = async (req) => {
   await this.selectArticleById(req);
-  const { rows: comments } = await db.query(
+  const query = format(
     `
     SELECT comment_id, votes, created_at, author, body, COUNT(*) OVER () AS total_count FROM comments 
     WHERE comments.article_id = $1
+    ORDER BY %I ${req.query.order || "desc"}
     ${
       req.query.limit
         ? `LIMIT ${req.query.limit} OFFSET ${
@@ -66,8 +67,11 @@ exports.selectArticleComments = async (req) => {
         : ""
     }
     `,
-    [req.params.article_id]
+    req.query.sort_by || "created_at"
   );
+
+  const { rows: comments } = await db.query(query, [req.params.article_id]);
+
   return comments;
 };
 
