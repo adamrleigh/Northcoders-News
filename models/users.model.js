@@ -91,6 +91,8 @@ exports.selectUserArticles = async (req) => {
     req.query.sort_by || "created_at"
   );
 
+  const { rows: articles } = await db.query(query, [req.params.username]);
+
   return articles;
 };
 
