@@ -876,3 +876,18 @@ describe("POST /api/users", () => {
     });
   });
 });
+
+describe("Select user articles", () => {
+  test("real username", async () => {
+    try {
+      const {
+        body: { articles },
+      } = await request(app)
+        .get("/api/users/butter_bridge/articles")
+        .expect(200);
+      console.log(articles);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+});

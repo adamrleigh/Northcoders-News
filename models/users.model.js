@@ -48,7 +48,7 @@ exports.selectUserById = async (req) => {
 };
 
 exports.selectUserComments = async (req, skip = false) => {
-  if (!skip) await this.selectUserById(req);
+  await this.selectUserById(req);
   const query = format(
     `
     SELECT *, COUNT(*) OVER () as total_count, SUM(votes) OVER () as comment_votes FROM comments 
@@ -71,11 +71,8 @@ exports.selectUserComments = async (req, skip = false) => {
 };
 
 exports.selectUserArticles = async (req) => {
-  const selection =
-    articleSelection +
-    ",COUNT(*) OVER () AS total_count, SUM(articles.votes) (OVER) as user_votes";
   const query = format(
-    `SELECT ${selection} FROM articles
+    `SELECT ${articleSelection} FROM articles
     LEFT OUTER JOIN comments ON articles.article_id = comments.article_id
     WHERE articles.author = $1
     GROUP BY articles.article_id
