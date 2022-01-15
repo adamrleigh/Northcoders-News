@@ -542,13 +542,15 @@ describe("GET /api/users/:username", () => {
   test("If username exists: Status 200 and returns object with key user containing user", async () => {
     const {
       body: { user },
-    } = await request(app).get("/api/users/lurker").expect(200);
-
+    } = await request(app).get("/api/users/butter_bridge").expect(200);
     expect(user).toEqual({
       avatar_url:
-        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-      name: "do_nothing",
-      username: "lurker",
+        "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+      name: "jonny",
+      username: "butter_bridge",
+      article_count: 3,
+      comment_count: 5,
+      total_votes: 148,
     });
   });
   test("If username does not exist: Status 404", async () => {
