@@ -56,7 +56,6 @@ npm i
 cp .env-example ./.env.test
 cp .env-example ./.env.development
 ```
-
 4. Replace the 'database_name_here' with the desired name of the database in both of the newly created .env files
 
 5. Create and seed the databases by entering:
@@ -65,11 +64,12 @@ npm run setup-dbs
 npm run seed
 ```
 
-6a. OPTIONAL: Check that everything is setup properly by entering:
+6. 
+OPTIONAL: Check that everything is setup properly by entering:
 ```
 npm t
 ```
-6b. Run the api by entering:
+Run the api by entering:
 ```
 npm start
 ```
