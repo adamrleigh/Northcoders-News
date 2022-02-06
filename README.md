@@ -56,7 +56,7 @@ npm i
 cp .env-example ./.env.test
 cp .env-example ./.env.development
 ```
-4. Replace the 'database_name_here' with the desired name of the database in both of the newly created .env files
+4. Replace the 'database_name_here' with the desired name of the test and development databases in each of the newly created .env files
 
 5. Create and seed the databases by entering:
 ```
