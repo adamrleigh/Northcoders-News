@@ -63,13 +63,12 @@ cp .env-example ./.env.development
 npm run setup-dbs
 npm run seed
 ```
-
-6. 
 OPTIONAL: Check that everything is setup properly by entering:
 ```
 npm t
 ```
-Run the api by entering:
+
+6. Run the api by entering:
 ```
 npm start
 ```
