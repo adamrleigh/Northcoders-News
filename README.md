@@ -63,7 +63,7 @@ cp .env-example ./.env.development
 npm run setup-dbs
 npm run seed
 ```
-OPTIONAL: Check that everything is setup properly by entering:
+  OPTIONAL: Check that everything is setup correctly by entering:
 ```
 npm t
 ```
