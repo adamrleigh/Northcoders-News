@@ -1,5 +1,4 @@
 const format = require("pg-format");
-const { getUserArticles } = require("../controllers/users.controller");
 const db = require("../db/connection");
 
 const articleSelection =

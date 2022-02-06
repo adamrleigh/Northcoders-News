@@ -92,35 +92,6 @@ exports.updateArticle = async (req) => {
   return articles[0];
 };
 
-// exports.addComment = async (req) => {
-//     await this.selectArticleById(req);
-//     const { rows: comments } = await db.query(
-//         format(`
-//     INSERT INTO comments
-//     (%I, %I, %I)
-//     VALUES
-//     ($1, $2, $3)
-//     RETURNING *;`,
-//             ...Object.keys(req.body), 'article_id'),
-//         [...Object.values(req.body), req.params.article_id]
-//     );
-//     return comments[0];
-// }
-
-// exports.addArticle = async (req) => {
-//     const { rows: articles } = await db.query(
-//         format(`
-//     INSERT INTO articles
-//     (%I, %I, %I, %I)
-//     VALUES
-//     ($1, $2, $3, $4)
-//     RETURNING article_id;`,
-//             ...Object.keys(req.body)),
-//         [...Object.values(req.body)]
-//     );
-//     return this.selectArticleById({ params: articles[0] });
-// }
-
 exports.addComment = async (req) => {
   await this.selectArticleById(req);
   const { rows: comments } = await db.query(
