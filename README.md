@@ -33,7 +33,7 @@ Northcoders news is a simple, full-stack, reddit-like news app created during no
 - NPM v8+
 - postgreSQL v12+
 - Github CLI
-- OPTIONAL: jest for testing
+- OPTIONAL: Jest (for testing)
 
 ### Running the app
 
