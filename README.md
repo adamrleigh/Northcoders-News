@@ -18,12 +18,12 @@ Northcoders news is a simple, full-stack, reddit-like news app created during no
 ## Links
 
   - **Front end:**
-    - [Hosted app](https://jovial-brahmagupta-dbf249.netlify.app/)
-    - [**Github repo**](https://github.com/adamrleigh/nc-news)
+    - [Hosted app](https://northcoders-news-frontend.netlify.app/)
+    - [Github repo](https://github.com/adamrleigh/northcoders-news-frontend)
 
-  - Back end:
+  - **Back end**:
     - [Hosted api](https://adam-northcoders-news.herokuapp.com/)
-    - [Github repo](https://github.com/adamrleigh/Northcoders-News)
+    - [**Github repo**](https://github.com/adamrleigh/northcoders-news-backend)
 
 ## Using the app
 
@@ -56,7 +56,7 @@ npm i
 cp .env-example ./.env.test
 cp .env-example ./.env.development
 ```
-4. Replace the 'database_name_here' with the desired name of the database in both of the newly created .env files
+4. Replace the 'database_name_here' with the desired name of the test and development databases in each of the newly created .env files
 
 5. Create and seed the databases by entering:
 ```
