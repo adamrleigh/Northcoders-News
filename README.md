@@ -19,11 +19,11 @@ Northcoders news is a simple, full-stack, reddit-like news app created during no
 
   - **Front end:**
     - [Hosted app](https://jovial-brahmagupta-dbf249.netlify.app/)
-    - [**Github repo**](https://github.com/adamrleigh/nc-news)
+    - [Github repo](https://github.com/adamrleigh/northcoders-news-frontend)
 
-  - Back end:
+  - **Back end**:
     - [Hosted api](https://adam-northcoders-news.herokuapp.com/)
-    - [Github repo](https://github.com/adamrleigh/Northcoders-News)
+    - [**Github repo**](https://github.com/adamrleigh/northcoders-news-backend)
 
 ## Using the app
 
