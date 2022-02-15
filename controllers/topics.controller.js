@@ -1,14 +1,19 @@
-const { selectTopics, selectTopicById, addTopic, removeTopic } = require('../models/topics.model');
-const { getThis, postThis, deleteThis } = require('./functions.controller');
+const {
+  selectTopics,
+  selectTopicById,
+  addTopic,
+  removeTopic,
+} = require("../models/topics.model");
+const { getThis, postThis, deleteThis } = require("./functions.controller");
 
-exports.getTopics = (req, res, next) =>
-    getThis(req, res, next, selectTopics, 'topics');
+exports.getTopics = (...controllerArgs) =>
+  getThis(...controllerArgs, selectTopics, "topics");
 
-exports.getTopicById = (req, res, next) =>
-    getThis(req, res, next, selectTopicById, 'topic');
+exports.getTopicById = (...controllerArgs) =>
+  getThis(...controllerArgs, selectTopicById, "topic");
 
-exports.postTopic = (req, res, next) =>
-    postThis(req, res, next, addTopic, 'topic');
+exports.postTopic = (...controllerArgs) =>
+  postThis(...controllerArgs, addTopic, "topic");
 
-exports.deleteTopic = (req, res, next) =>
-    deleteThis(req, res, next, removeTopic);
+exports.deleteTopic = (...controllerArgs) =>
+  deleteThis(...controllerArgs, removeTopic);

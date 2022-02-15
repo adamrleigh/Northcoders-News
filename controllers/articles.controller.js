@@ -1,25 +1,36 @@
-const { selectArticles, selectArticleById, selectArticleComments, updateArticle, addComment, addArticle, removeArticle } = require('../models/articles.model');
-const { getThis, postThis, deleteThis, patchThis } = require('./functions.controller')
+const {
+  selectArticles,
+  selectArticleById,
+  selectArticleComments,
+  updateArticle,
+  addComment,
+  addArticle,
+  removeArticle,
+} = require("../models/articles.model");
+const {
+  getThis,
+  postThis,
+  deleteThis,
+  patchThis,
+} = require("./functions.controller");
 
+exports.getArticles = (...controllerArgs) =>
+  getThis(...controllerArgs, selectArticles, "articles");
 
+exports.getArticleById = (...controllerArgs) =>
+  getThis(...controllerArgs, selectArticleById, "article");
 
-exports.getArticles = (req, res, next) =>
-    getThis(req, res, next, selectArticles, 'articles');
+exports.getArticleComments = (...controllerArgs) =>
+  getThis(...controllerArgs, selectArticleComments, "comments");
 
-exports.getArticleById = (req, res, next) =>
-    getThis(req, res, next, selectArticleById, 'article');
+exports.patchArticle = (...controllerArgs) =>
+  patchThis(...controllerArgs, updateArticle, "article");
 
-exports.getArticleComments = (req, res, next) =>
-    getThis(req, res, next, selectArticleComments, 'comments');
+exports.postComment = (...controllerArgs) =>
+  postThis(...controllerArgs, addComment, "comment");
 
-exports.patchArticle = (req, res, next) =>
-    patchThis(req, res, next, updateArticle, 'article')
+exports.postArticle = (...controllerArgs) =>
+  postThis(...controllerArgs, addArticle, "article");
 
-exports.postComment = (req, res, next) =>
-    postThis(req, res, next, addComment, 'comment');
-
-exports.postArticle = (req, res, next) =>
-    postThis(req, res, next, addArticle, 'article');
-
-exports.deleteArticle = (req, res, next) =>
-    deleteThis(req, res, next, removeArticle);
+exports.deleteArticle = (...controllerArgs) =>
+  deleteThis(...controllerArgs, removeArticle);

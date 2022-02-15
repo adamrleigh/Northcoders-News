@@ -8,19 +8,20 @@ const {
 } = require("../models/users.model");
 const { getThis, postThis, deleteThis } = require("./functions.controller");
 
-exports.getUsers = (req, res, next) =>
-  getThis(req, res, next, selectUsers, "users");
+exports.getUsers = (...controllerArgs) =>
+  getThis(...controllerArgs, selectUsers, "users");
 
-exports.getUserById = (req, res, next) =>
-  getThis(req, res, next, selectUserById, "user");
+exports.getUserById = (...controllerArgs) =>
+  getThis(...controllerArgs, selectUserById, "user");
 
-exports.postUser = (req, res, next) =>
-  postThis(req, res, next, addUser, "user");
+exports.postUser = (...controllerArgs) =>
+  postThis(...controllerArgs, addUser, "user");
 
-exports.getUserComments = (req, res, next) =>
-  getThis(req, res, next, selectUserComments, "comments");
+exports.getUserComments = (...controllerArgs) =>
+  getThis(...controllerArgs, selectUserComments, "comments");
 
-exports.getUserArticles = (req, res, next) =>
-  getThis(req, res, next, selectUserArticles, "articles");
+exports.getUserArticles = (...controllerArgs) =>
+  getThis(...controllerArgs, selectUserArticles, "articles");
 
-exports.deleteUser = (req, res, next) => deleteThis(req, res, next, removeUser);
+exports.deleteUser = (...controllerArgs) =>
+  deleteThis(...controllerArgs, removeUser);
